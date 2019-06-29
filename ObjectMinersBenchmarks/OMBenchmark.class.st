@@ -22,17 +22,35 @@ OMBenchmark >> bench: aBlock [
 
 { #category : #'benchmarks - tools' }
 OMBenchmark >> benchAll [
-	|results|
+	| results |
 	results := Dictionary new.
-	results at: 'Reference no instrumentation' put: self benchReferenceNoInstrumentation.
-	results at: 'Miner Simple' put: self benchMinersSimple.
-	results at: 'Miner Record Intermediate Objects' put: self benchMinersRecordIntermediate.
-	results inspect 
+	results
+		at: 'Reference no instrumentation'
+			put: self benchReferenceNoInstrumentation;
+		at: 'Miner Simple' put: self benchMinersSimple;
+		at: 'Miner Record Intermediate Objects'
+			put: self benchMinersRecordIntermediate;
+		at: 'Miner With Reifications' put: self benchMinersWithReifications;
+		at: 'Miner Record Intermediate Objects, with reifications'
+			put: self benchMinersIntermediateAndReifications.
+	results inspect
 ]
 
 { #category : #benchmarks }
 OMBenchmark >> benchMiner [
 	^ self bench: [ self minerInstrumentedMethod ]
+]
+
+{ #category : #benchmarks }
+OMBenchmark >> benchMinersIntermediateAndReifications [
+	| miner res |
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner recordIntermediateObjects: true.
+	miner captureContext: self reificationsForMiner.
+	miner install.
+	res := self benchMiner.
+	miner uninstall.
+	^ res
 ]
 
 { #category : #benchmarks }
@@ -50,6 +68,17 @@ OMBenchmark >> benchMinersRecordIntermediate [
 OMBenchmark >> benchMinersSimple [
 	| miner res |
 	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner install.
+	res := self benchMiner.
+	miner uninstall.
+	^ res
+]
+
+{ #category : #benchmarks }
+OMBenchmark >> benchMinersWithReifications [
+	| miner res |
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner captureContext: self reificationsForMiner.
 	miner install.
 	res := self benchMiner.
 	miner uninstall.
@@ -79,7 +108,7 @@ OMBenchmark >> referenceNoInstrumentation [
 
 { #category : #'benchmarks - tools' }
 OMBenchmark >> reificationsForMiner [
-	^ #(#object #class #arguments #context #receiver #selector)
+	^ #(#object #context #class #arguments #receiver #selector)
 ]
 
 { #category : #'benchmarks - tools' }
