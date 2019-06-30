@@ -195,14 +195,54 @@ OMBenchmark >> referenceRecordIntermediateInstrumentation [
 ]
 
 { #category : #'reference methods' }
+OMBenchmark >> referenceReificationsWithIntermediateInstrumentation [
+	|rcv reifs subs temp1 temp2 temp3|
+	
+	subs := OrderedCollection new.
+	
+	rcv := 10.
+	temp1 := rcv squared.
+	reifs := OrderedCollection new.
+	reifs add: temp1; add: #squared; add: OMBenchmark; add: self; add: rcv.
+	subs add: reifs.
+	
+	rcv := temp1.
+	temp2 := temp1 + 1.
+	reifs := OrderedCollection new.
+	reifs add: temp2; add: #+; add: OMBenchmark; add: self; add: rcv.
+	subs add: reifs.
+	
+	rcv := temp2.
+	temp3 := temp2 asString.
+	reifs := OrderedCollection new.
+	reifs add: temp3; add: #asString; add: OMBenchmark; add: self; add: rcv.
+	subs add: reifs.	
+	
+	simpleItems add: subs
+]
+
+{ #category : #'reference methods' }
+OMBenchmark >> referenceWithReificationsInstrumentation [
+	| value receiver reifications |
+	reifications := OrderedCollection new.
+	receiver := 10 squared + 1.
+	value := receiver asString.
+	reifications add: value.
+	reifications add: #asString.
+	reifications add: OMBenchmark.
+	reifications add: self.
+	reifications add: receiver.
+	simpleItems add: reifications
+]
+
+{ #category : #'reference methods' }
 OMBenchmark >> referenceWithSimpleInstrumentation [
 	simpleItems add: (10 squared + 1) asString
 ]
 
 { #category : #'benchmarks - tools' }
 OMBenchmark >> reificationsForMiner [
-	^ #(#object #class #arguments #receiver #selector)
-	" #(#object #receiver #arguments)"
+	^ #(#object #class #receiver #selector)
 ]
 
 { #category : #'benchmarks - tools' }
@@ -224,6 +264,12 @@ OMBenchmark >> showSlowdown: results [
 			(computingBlock
 				value: (results at: 'Reference no instrumentation') frequency
 				value: (results at: 'Reference simple instrumentation') frequency).
+		dict
+		at: 'Reference record intermediate'
+		put:
+			(computingBlock
+				value: (results at: 'Reference no instrumentation') frequency
+				value: (results at: 'Reference record intermediate') frequency).
 	dict
 		at: 'Miner Record Intermediate Objects'
 		put:
