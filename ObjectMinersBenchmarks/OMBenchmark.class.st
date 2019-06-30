@@ -37,7 +37,7 @@ OMBenchmark >> benchAll [
 	(self showSlowdown: results) inspect
 ]
 
-{ #category : #benchmarks }
+{ #category : #'benchmarks - tools' }
 OMBenchmark >> benchMiner [
 	|inst|
 	inst := OMBenchmark new.
@@ -100,9 +100,22 @@ OMBenchmark >> minerInstrumentedMethod [
 	(10 squared + 1) asString
 ]
 
-{ #category : #miners }
-OMBenchmark >> minerSimple [
-	((Random new next: 10) squared + 1) asString
+{ #category : #'benchmarks - tools' }
+OMBenchmark >> profileMiner [
+	|inst|
+	inst := OMBenchmark new.
+	^ TimeProfiler spyOn: [ 1000000 timesRepeat: [inst minerInstrumentedMethod] ]
+]
+
+{ #category : #benchmarks }
+OMBenchmark >> profileMinersWithReifications [
+	| miner res |
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner captureContext: self reificationsForMiner.
+	miner install.
+	res := self profileMiner.
+	miner uninstall.
+	^ res
 ]
 
 { #category : #'reference methods' }
@@ -112,7 +125,7 @@ OMBenchmark >> referenceNoInstrumentation [
 
 { #category : #'benchmarks - tools' }
 OMBenchmark >> reificationsForMiner [
-	^ #(#object #context #class #arguments #receiver #selector)
+	^ #(#object #class #arguments #receiver #selector)
 ]
 
 { #category : #'benchmarks - tools' }
