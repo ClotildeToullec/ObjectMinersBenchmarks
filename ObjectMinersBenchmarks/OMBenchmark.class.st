@@ -17,6 +17,7 @@ OMBenchmark >> astForMiner [
 
 { #category : #'benchmarks - tools' }
 OMBenchmark >> bench: aBlock [
+	Smalltalk garbageCollect.
 	^ aBlock benchFor: self timeToBench
 ]
 
@@ -33,12 +34,14 @@ OMBenchmark >> benchAll [
 		at: 'Miner With Reifications' put: self benchMinersWithReifications;
 		at: 'Miner Record Intermediate Objects, with reifications'
 			put: self benchMinersIntermediateAndReifications.
-	results inspect
+	(self showSlowdown: results) inspect
 ]
 
 { #category : #benchmarks }
 OMBenchmark >> benchMiner [
-	^ self bench: [ self minerInstrumentedMethod ]
+	|inst|
+	inst := MyBaseObject new.
+	^ self bench: [ inst minerInstrumentedMethod ]
 ]
 
 { #category : #benchmarks }
@@ -87,12 +90,14 @@ OMBenchmark >> benchMinersWithReifications [
 
 { #category : #benchmarks }
 OMBenchmark >> benchReferenceNoInstrumentation [ 
-	 ^self bench: [self referenceNoInstrumentation ] 
+	|inst|
+	inst := MyBaseObject new.
+	 ^self bench: [inst referenceNoInstrumentation ] 
 ]
 
 { #category : #'reference methods' }
 OMBenchmark >> minerInstrumentedMethod [
-	((Random new next: 10) squared + 1) asString
+	(10 squared + 1) asString
 ]
 
 { #category : #miners }
@@ -102,13 +107,26 @@ OMBenchmark >> minerSimple [
 
 { #category : #'reference methods' }
 OMBenchmark >> referenceNoInstrumentation [
-	
-	((Random new next: 10) squared + 1) asString
+	(10 squared + 1) asString
 ]
 
 { #category : #'benchmarks - tools' }
 OMBenchmark >> reificationsForMiner [
 	^ #(#object #context #class #arguments #receiver #selector)
+]
+
+{ #category : #'benchmarks - tools' }
+OMBenchmark >> showSlowdown: results [
+	| computingBlock |
+	computingBlock := [ :ref :res | (ref / res round: 2) asFloat ].
+	^ Dictionary
+		newFromKeys: results keys
+		andValues:
+			(results
+				valuesDo: [ :v | 
+					computingBlock
+						value: (results at: 'Reference no instrumentation') frequency
+						value: v frequency ])
 ]
 
 { #category : #'benchmarks - tools' }
