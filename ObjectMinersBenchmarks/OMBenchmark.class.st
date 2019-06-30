@@ -40,7 +40,7 @@ OMBenchmark >> benchAll [
 { #category : #benchmarks }
 OMBenchmark >> benchMiner [
 	|inst|
-	inst := MyBaseObject new.
+	inst := OMBenchmark new.
 	^ self bench: [ inst minerInstrumentedMethod ]
 ]
 
@@ -91,7 +91,7 @@ OMBenchmark >> benchMinersWithReifications [
 { #category : #benchmarks }
 OMBenchmark >> benchReferenceNoInstrumentation [ 
 	|inst|
-	inst := MyBaseObject new.
+	inst := OMBenchmark new.
 	 ^self bench: [inst referenceNoInstrumentation ] 
 ]
 
@@ -122,8 +122,8 @@ OMBenchmark >> showSlowdown: results [
 	^ Dictionary
 		newFromKeys: results keys
 		andValues:
-			(results
-				valuesDo: [ :v | 
+			(results values
+				collect: [ :v | 
 					computingBlock
 						value: (results at: 'Reference no instrumentation') frequency
 						value: v frequency ])
