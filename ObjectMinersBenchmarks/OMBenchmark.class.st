@@ -36,13 +36,17 @@ OMBenchmark >> benchAll [
 			put: self benchReferenceSimpleInstrumentation;
 		at: 'Reference record intermediate'
 			put: self benchReferenceRecordIntermediateInstrumentation;
+		at: 'Reference With Reifications'
+			put: self benchReferenceWithReificationsInstrumentation;
+		at: 'Reference Record Intermediate Objects, with reifications'
+			put: self benchReferenceRecordIntermediateWithReificationsInstrumentation;
 		at: 'Miner Simple' put: self benchMinersSimple;
 		at: 'Miner Record Intermediate Objects'
 			put: self benchMinersRecordIntermediate;
 		at: 'Miner With Reifications' put: self benchMinersWithReifications;
 		at: 'Miner Record Intermediate Objects, with reifications'
 			put: self benchMinersIntermediateAndReifications.
-	(self showSlowdown: results) inspect
+	(self computeSlowdown: results) inspect
 ]
 
 { #category : #'benchmarks - tools' }
@@ -111,10 +115,70 @@ OMBenchmark >> benchReferenceRecordIntermediateInstrumentation [
 ]
 
 { #category : #'benchmark - references' }
+OMBenchmark >> benchReferenceRecordIntermediateWithReificationsInstrumentation [ 
+	|inst|
+	inst := OMBenchmark new.
+	 ^self bench: [inst referenceReificationsWithIntermediateInstrumentation  ] 
+]
+
+{ #category : #'benchmark - references' }
 OMBenchmark >> benchReferenceSimpleInstrumentation [ 
 	|inst|
 	inst := OMBenchmark new.
 	 ^self bench: [inst referenceWithSimpleInstrumentation  ] 
+]
+
+{ #category : #'benchmark - references' }
+OMBenchmark >> benchReferenceWithReificationsInstrumentation [ 
+	|inst|
+	inst := OMBenchmark new.
+	 ^self bench: [inst referenceWithReificationsInstrumentation  ] 
+]
+
+{ #category : #'benchmarks - tools' }
+OMBenchmark >> computeSlowdown: results [
+	| dict |
+	dict := Dictionary new.
+	dict
+		at: 'Simple instrumentation'
+		put:
+			(self
+				computeSlowdownBetween: (results at: 'Reference no instrumentation') frequency
+				instrumented: (results at: 'Reference simple instrumentation') frequency
+				miners: (results at: 'Miner Simple') frequency).
+	dict
+		at: 'Record intermediate'
+		put:
+			(self
+				computeSlowdownBetween: (results at: 'Reference no instrumentation') frequency
+				instrumented: (results at: 'Reference record intermediate') frequency
+				miners: (results at: 'Miner Record Intermediate Objects') frequency).
+	dict
+		at: 'Reifications'
+		put:
+			(self
+				computeSlowdownBetween: (results at: 'Reference no instrumentation') frequency
+				instrumented: (results at: 'Reference With Reifications') frequency
+				miners: (results at: 'Miner With Reifications') frequency).
+	dict
+		at: 'Record intermediate + reifications'
+		put:
+			(self
+				computeSlowdownBetween: (results at: 'Reference no instrumentation') frequency
+				instrumented: (results at: 'Reference Record Intermediate Objects, with reifications') frequency
+				miners: (results at: 'Miner Record Intermediate Objects, with reifications') frequency).
+	^ dict
+]
+
+{ #category : #'benchmarks - tools' }
+OMBenchmark >> computeSlowdownBetween: reference instrumented: instrumented miners: miners [
+	| computingBlock col |
+	computingBlock := [ :ref :res | (ref / res round: 2) asFloat - 1 ].
+	col := OrderedCollection new.
+	col add: ('Instrumented/Reference slowdown' -> (computingBlock value: reference value: instrumented)).
+	col add: ('Miners/Reference slowdown' -> (computingBlock value: reference value: miners)).
+	col add: ('Miners/Instrumented' -> (computingBlock value: instrumented value: miners)).
+	^col
 ]
 
 { #category : #initialize }
