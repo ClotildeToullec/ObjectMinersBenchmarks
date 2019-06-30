@@ -196,12 +196,13 @@ OMBenchmark >> showSlowdown: results [
 					computingBlock
 						value: (results at: 'Reference simple instrumentation') frequency
 						value: v frequency ]).
+	dict at: 'Reference no instrumentation' put: 1.
 	dict
-		at: 'Reference simple/no instrumentation'
+		at: 'Reference simple instrumentation'
 		put:
 			(computingBlock
-				value: (results at: 'Reference simple instrumentation') frequency
-				value: (results at: 'Reference no instrumentation') frequency).
+				value: (results at: 'Reference no instrumentation') frequency
+				value: (results at: 'Reference simple instrumentation') frequency).
 	^ dict
 ]
 
