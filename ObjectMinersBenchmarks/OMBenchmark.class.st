@@ -34,6 +34,8 @@ OMBenchmark >> benchAll [
 			put: self benchReferenceNoInstrumentation;
 		at: 'Reference simple instrumentation'
 			put: self benchReferenceSimpleInstrumentation;
+		at: 'Reference record intermediate'
+			put: self benchReferenceRecordIntermediateInstrumentation;
 		at: 'Miner Simple' put: self benchMinersSimple;
 		at: 'Miner Record Intermediate Objects'
 			put: self benchMinersRecordIntermediate;
@@ -94,14 +96,21 @@ OMBenchmark >> benchMinersWithReifications [
 	^ res
 ]
 
-{ #category : #benchmarks }
+{ #category : #'benchmark - references' }
 OMBenchmark >> benchReferenceNoInstrumentation [ 
 	|inst|
 	inst := OMBenchmark new.
 	 ^self bench: [inst referenceNoInstrumentation  ] 
 ]
 
-{ #category : #benchmarks }
+{ #category : #'benchmark - references' }
+OMBenchmark >> benchReferenceRecordIntermediateInstrumentation [ 
+	|inst|
+	inst := OMBenchmark new.
+	 ^self bench: [inst referenceRecordIntermediateInstrumentation  ] 
+]
+
+{ #category : #'benchmark - references' }
 OMBenchmark >> benchReferenceSimpleInstrumentation [ 
 	|inst|
 	inst := OMBenchmark new.
@@ -175,8 +184,19 @@ OMBenchmark >> referenceNoInstrumentation [
 ]
 
 { #category : #'reference methods' }
+OMBenchmark >> referenceRecordIntermediateInstrumentation [
+	|subs temp1 temp2 temp3|
+	subs := OrderedCollection new.
+	temp1 := 10 squared.
+	temp2 := temp1 + 1.
+	temp3 := temp2 asString.
+	subs add: temp1; add: temp2; add: temp3.
+	simpleItems add: subs
+]
+
+{ #category : #'reference methods' }
 OMBenchmark >> referenceWithSimpleInstrumentation [
-	simpleItems add: (10 squared + 1) asString.
+	simpleItems add: (10 squared + 1) asString
 ]
 
 { #category : #'benchmarks - tools' }
@@ -188,7 +208,7 @@ OMBenchmark >> reificationsForMiner [
 { #category : #'benchmarks - tools' }
 OMBenchmark >> showSlowdown: results [
 	| computingBlock dict |
-	computingBlock := [ :ref :res | (ref / res round: 2) asFloat ].
+	computingBlock := [ :ref :res | (ref / res round: 2) asFloat - 1 ].
 	dict := Dictionary
 		newFromKeys: results keys
 		andValues:
@@ -204,6 +224,12 @@ OMBenchmark >> showSlowdown: results [
 			(computingBlock
 				value: (results at: 'Reference no instrumentation') frequency
 				value: (results at: 'Reference simple instrumentation') frequency).
+	dict
+		at: 'Miner Record Intermediate Objects'
+		put:
+			(computingBlock
+				value: (results at: 'Reference record intermediate') frequency
+				value: (results at: 'Miner Record Intermediate Objects') frequency).
 	^ dict
 ]
 
