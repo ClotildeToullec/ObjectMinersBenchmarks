@@ -10,6 +10,7 @@ Class {
 { #category : #benchmarking }
 OMBenchmark class >> bench [
 	<script>
+	Smalltalk garbageCollect.
 	^ self new benchAll
 ]
 
@@ -109,7 +110,7 @@ OMBenchmark >> benchReferenceSimpleInstrumentation [
 
 { #category : #initialize }
 OMBenchmark >> initialize [
-	simpleItems := OrderedCollection new
+	simpleItems := OrderedCollection new: 1000000
 ]
 
 { #category : #'reference methods' }
