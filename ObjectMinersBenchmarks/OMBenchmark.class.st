@@ -1,6 +1,9 @@
 Class {
 	#name : #OMBenchmark,
 	#superclass : #Object,
+	#instVars : [
+		'simpleItems'
+	],
 	#category : #ObjectMinersBenchmarks
 }
 
@@ -28,6 +31,8 @@ OMBenchmark >> benchAll [
 	results
 		at: 'Reference no instrumentation'
 			put: self benchReferenceNoInstrumentation;
+		at: 'Reference simple instrumentation'
+			put: self benchReferenceSimpleInstrumentation;
 		at: 'Miner Simple' put: self benchMinersSimple;
 		at: 'Miner Record Intermediate Objects'
 			put: self benchMinersRecordIntermediate;
@@ -92,7 +97,19 @@ OMBenchmark >> benchMinersWithReifications [
 OMBenchmark >> benchReferenceNoInstrumentation [ 
 	|inst|
 	inst := OMBenchmark new.
-	 ^self bench: [inst referenceNoInstrumentation ] 
+	 ^self bench: [inst referenceNoInstrumentation  ] 
+]
+
+{ #category : #benchmarks }
+OMBenchmark >> benchReferenceSimpleInstrumentation [ 
+	|inst|
+	inst := OMBenchmark new.
+	 ^self bench: [inst referenceWithSimpleInstrumentation  ] 
+]
+
+{ #category : #initialize }
+OMBenchmark >> initialize [
+	simpleItems := OrderedCollection new
 ]
 
 { #category : #'reference methods' }
@@ -104,7 +121,7 @@ OMBenchmark >> minerInstrumentedMethod [
 OMBenchmark >> profileMiner [
 	|inst|
 	inst := OMBenchmark new.
-	^ TimeProfiler spyOn: [ 1000000 timesRepeat: [inst minerInstrumentedMethod] ]
+	^ TimeProfiler spyOn: [ 10000000 timesRepeat: [inst minerInstrumentedMethod] ]
 ]
 
 { #category : #profiling }
@@ -156,23 +173,36 @@ OMBenchmark >> referenceNoInstrumentation [
 	(10 squared + 1) asString
 ]
 
+{ #category : #'reference methods' }
+OMBenchmark >> referenceWithSimpleInstrumentation [
+	simpleItems add: (10 squared + 1) asString.
+]
+
 { #category : #'benchmarks - tools' }
 OMBenchmark >> reificationsForMiner [
 	^ #(#object #class #arguments #receiver #selector)
+	" #(#object #receiver #arguments)"
 ]
 
 { #category : #'benchmarks - tools' }
 OMBenchmark >> showSlowdown: results [
-	| computingBlock |
+	| computingBlock dict |
 	computingBlock := [ :ref :res | (ref / res round: 2) asFloat ].
-	^ Dictionary
+	dict := Dictionary
 		newFromKeys: results keys
 		andValues:
 			(results values
 				collect: [ :v | 
 					computingBlock
-						value: (results at: 'Reference no instrumentation') frequency
-						value: v frequency ])
+						value: (results at: 'Reference simple instrumentation') frequency
+						value: v frequency ]).
+	dict
+		at: 'Reference simple/no instrumentation'
+		put:
+			(computingBlock
+				value: (results at: 'Reference simple instrumentation') frequency
+				value: (results at: 'Reference no instrumentation') frequency).
+	^ dict
 ]
 
 { #category : #'benchmarks - tools' }
