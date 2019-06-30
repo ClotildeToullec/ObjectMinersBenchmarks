@@ -100,14 +100,47 @@ OMBenchmark >> minerInstrumentedMethod [
 	(10 squared + 1) asString
 ]
 
-{ #category : #'benchmarks - tools' }
+{ #category : #profiling }
 OMBenchmark >> profileMiner [
 	|inst|
 	inst := OMBenchmark new.
 	^ TimeProfiler spyOn: [ 1000000 timesRepeat: [inst minerInstrumentedMethod] ]
 ]
 
-{ #category : #benchmarks }
+{ #category : #profiling }
+OMBenchmark >> profileMinersIntermediateAndReifications [
+	| miner res |
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner recordIntermediateObjects: true.
+	miner captureContext: self reificationsForMiner.
+	miner install.
+	res := self profileMiner.
+	miner uninstall.
+	^ res
+]
+
+{ #category : #profiling }
+OMBenchmark >> profileMinersRecordIntermediate [
+	| miner res |
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner recordIntermediateObjects: true.
+	miner install.
+	res := self profileMiner.
+	miner uninstall.
+	^ res
+]
+
+{ #category : #profiling }
+OMBenchmark >> profileMinersSimple [
+	| miner res |
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner install.
+	res := self profileMiner.
+	miner uninstall.
+	^ res
+]
+
+{ #category : #profiling }
 OMBenchmark >> profileMinersWithReifications [
 	| miner res |
 	miner := ObjectMiner new reachFromAST: self astForMiner.
