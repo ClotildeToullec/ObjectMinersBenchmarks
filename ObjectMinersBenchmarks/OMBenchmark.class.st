@@ -15,6 +15,27 @@ OMBenchmark class >> bench [
 	^ self new benchAll
 ]
 
+{ #category : #benchmarking }
+OMBenchmark class >> benchMinerMemorySimpleInstrumentation [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new benchMinerMemorySimpleInstrumentation
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> benchReferenceMemoryFullInstrumentationNoStack [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new benchReferenceMemoryFullInstrumentationNoStack
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> benchReferenceMemorySimpleInstrumentation [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new benchReferenceMemorySimpleInstrumentation
+]
+
 { #category : #'benchmarks - tools' }
 OMBenchmark >> actionMethod [
 ]
@@ -63,14 +84,13 @@ OMBenchmark >> benchMiner [
 
 { #category : #'benchmark - memory' }
 OMBenchmark >> benchMinerMemorySimpleInstrumentation [
-	| miner res |
+	| miner inst |
 	Smalltalk garbageCollect.
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner install.
-	self benchMiner.
-	res := self performMemoryAnalysis.
-	miner uninstall.
-	^ res
+	inst := OMBenchmark new.
+	self timeAndMemoryProfile: [ inst minerInstrumentedMethod ].
+	miner uninstall
 ]
 
 { #category : #benchmarks }
@@ -180,12 +200,11 @@ OMBenchmark >> benchReferenceFullInstrumentationNoStack [
 ]
 
 { #category : #'benchmark - memory' }
-OMBenchmark >> benchReferenceMemoryFullInstrumentationNoStack [ 
-	|inst|
+OMBenchmark >> benchReferenceMemoryFullInstrumentationNoStack [
+	| inst |
 	inst := OMBenchmark new.
-	inst bool: true.	
-	self bench: [inst referenceFullInstrumentation  ].
-	^self performMemoryAnalysis.
+	inst bool: true.
+	self timeAndMemoryProfile: [ inst referenceFullInstrumentation ]
 ]
 
 { #category : #'benchmark - memory' }
@@ -194,8 +213,8 @@ OMBenchmark >> benchReferenceMemorySimpleInstrumentation [
 	Smalltalk garbageCollect.
 	inst := OMBenchmark new.
 	inst bool: true.
-	self bench: [ inst referenceSimpleInstrumentationWithContext ].
-	^ self performMemoryAnalysis
+	self timeAndMemoryProfile:[ inst referenceSimpleInstrumentationWithContext]
+	
 ]
 
 { #category : #'benchmark - references' }
@@ -323,14 +342,6 @@ OMBenchmark >> initialize [
 { #category : #'reference methods' }
 OMBenchmark >> minerInstrumentedMethod [
 	(10 squared + 1) asString
-]
-
-{ #category : #'benchmarks - tools' }
-OMBenchmark >> performMemoryAnalysis [
-	|str|
-	str := WriteStream on: String new.
-	SpaceTally new printSpaceAnalysis: 1 on: str.
-	^str contents
 ]
 
 { #category : #profiling }
@@ -603,6 +614,11 @@ OMBenchmark >> showSlowdown: results [
 { #category : #accessing }
 OMBenchmark >> simpleItems: anObject [
 	simpleItems := anObject
+]
+
+{ #category : #'benchmarks - tools' }
+OMBenchmark >> timeAndMemoryProfile: aBlock [
+	TimeProfiler spyOn: [ 10000000 timesRepeat: aBlock ]
 ]
 
 { #category : #'benchmarks - tools' }
