@@ -61,6 +61,18 @@ OMBenchmark >> benchMiner [
 	^ self bench: [ inst minerInstrumentedMethod ]
 ]
 
+{ #category : #'benchmark - memory' }
+OMBenchmark >> benchMinerMemorySimpleInstrumentation [
+	| miner res |
+	Smalltalk garbageCollect.
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner install.
+	self benchMiner.
+	res := SpaceTally new spaceTally: {self class.}.
+	miner uninstall.
+	^ res
+]
+
 { #category : #benchmarks }
 OMBenchmark >> benchMinersIntermediateAndReifications [
 	| miner res |
@@ -165,6 +177,25 @@ OMBenchmark >> benchReferenceFullInstrumentationNoStack [
 	inst := OMBenchmark new.
 	inst bool: true.	
 	 ^self bench: [inst referenceFullInstrumentation  ] 
+]
+
+{ #category : #'benchmark - memory' }
+OMBenchmark >> benchReferenceMemoryFullInstrumentationNoStack [ 
+	|inst|
+	inst := OMBenchmark new.
+	inst bool: true.	
+	self bench: [inst referenceFullInstrumentation  ].
+	^SpaceTally new spaceTally: {self class}
+]
+
+{ #category : #'benchmark - memory' }
+OMBenchmark >> benchReferenceMemorySimpleInstrumentation [
+	| inst |
+	Smalltalk garbageCollect.
+	inst := OMBenchmark new.
+	inst bool: true.
+	self bench: [ inst referenceSimpleInstrumentationWithContext ].
+	^ SpaceTally new spaceTally: {self class}
 ]
 
 { #category : #'benchmark - references' }
