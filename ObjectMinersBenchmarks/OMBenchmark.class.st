@@ -523,7 +523,7 @@ OMBenchmark >> setReplayForMiner: miner [
 	rawData := {nil. 1. node. nil.}.
 	record := OmniscientItem new.
 	record rawData: rawData.
-	miner replayRecord: record 
+	miner collector replayCollectedItem: record 
 	
 ]
 
