@@ -68,7 +68,7 @@ OMBenchmark >> benchMinerMemorySimpleInstrumentation [
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner install.
 	self benchMiner.
-	res := SpaceTally new spaceTally: {self class.}.
+	res := self performMemoryAnalysis.
 	miner uninstall.
 	^ res
 ]
@@ -185,7 +185,7 @@ OMBenchmark >> benchReferenceMemoryFullInstrumentationNoStack [
 	inst := OMBenchmark new.
 	inst bool: true.	
 	self bench: [inst referenceFullInstrumentation  ].
-	^SpaceTally new spaceTally: {self class}
+	^self performMemoryAnalysis.
 ]
 
 { #category : #'benchmark - memory' }
@@ -195,7 +195,7 @@ OMBenchmark >> benchReferenceMemorySimpleInstrumentation [
 	inst := OMBenchmark new.
 	inst bool: true.
 	self bench: [ inst referenceSimpleInstrumentationWithContext ].
-	^ SpaceTally new spaceTally: {self class}
+	^ self performMemoryAnalysis
 ]
 
 { #category : #'benchmark - references' }
@@ -323,6 +323,14 @@ OMBenchmark >> initialize [
 { #category : #'reference methods' }
 OMBenchmark >> minerInstrumentedMethod [
 	(10 squared + 1) asString
+]
+
+{ #category : #'benchmarks - tools' }
+OMBenchmark >> performMemoryAnalysis [
+	|str|
+	str := WriteStream on: String new.
+	SpaceTally new printSpaceAnalysis: 1 on: str.
+	^str contents
 ]
 
 { #category : #profiling }
