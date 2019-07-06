@@ -30,6 +30,13 @@ OMBenchmark class >> benchReferenceMemoryFullInstrumentationNoStack [
 ]
 
 { #category : #benchmarking }
+OMBenchmark class >> benchReferenceMemoryNoInstrumentation [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new benchReferenceMemoryNoInstrumentation
+]
+
+{ #category : #benchmarking }
 OMBenchmark class >> benchReferenceMemorySimpleInstrumentation [
 	<script>
 	Smalltalk garbageCollect.
