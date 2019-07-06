@@ -95,6 +95,19 @@ OMBenchmark >> benchMinersSimple [
 ]
 
 { #category : #benchmarks }
+OMBenchmark >> benchMinersSimpleWithContext [
+	| miner res |
+	self reinstallCollectorsContextBehavior.
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	self flag: 'Set the context as reification'.
+	miner install.
+	res := self benchMiner.
+	miner uninstall.
+	self uninstallCollectorsContextBehavior.
+	^ res
+]
+
+{ #category : #benchmarks }
 OMBenchmark >> benchMinersWithReifications [
 	| miner res |
 	miner := ObjectMiner new reachFromAST: self astForMiner.
@@ -169,6 +182,13 @@ OMBenchmark >> benchReferenceSimpleInstrumentation [
 	|inst|
 	inst := OMBenchmark new.
 	 ^self bench: [inst referenceWithSimpleInstrumentation  ] 
+]
+
+{ #category : #'benchmark - references' }
+OMBenchmark >> benchReferenceSimpleInstrumentationWithContext [ 
+	|inst|
+	inst := OMBenchmark new.
+	 ^self bench: [inst referenceSimpleInstrumentationWithContext  ] 
 ]
 
 { #category : #'benchmark - references' }
@@ -424,6 +444,14 @@ OMBenchmark >> referenceReificationsWithIntermediateInstrumentation [
 ]
 
 { #category : #'reference methods' }
+OMBenchmark >> referenceSimpleInstrumentationWithContext [
+	|context|
+	context := thisContext.
+	context := (context stackOfSize: 20) copy.
+	simpleItems add: (10 squared + 1) asString
+]
+
+{ #category : #'reference methods' }
 OMBenchmark >> referenceWithReificationsInstrumentation [
 	| value receiver reifications |
 	reifications := OrderedCollection new.
@@ -445,6 +473,23 @@ OMBenchmark >> referenceWithSimpleInstrumentation [
 { #category : #'benchmarks - tools' }
 OMBenchmark >> reificationsForMiner [
 	^ #(#object #class #receiver #selector)
+]
+
+{ #category : #'benchmarks - tools' }
+OMBenchmark >> reinstallCollectorsContextBehavior [
+
+	CollectBehavior compile: 
+	'omniscientCollect: anObject in: aCollector withReifications: anArrayOfReifications
+	| item |
+	item := self omniscientItemClass new.
+	item rawData: anArrayOfReifications.
+	item reificationSpec: aCollector reifications.
+	((aCollector reifications includes: #context)
+		and: [ aCollector metaController stackSize > 0 ])
+		ifTrue: [ item copyContext: item context ].
+	aCollector applyTransformationsTo: item from: anArrayOfReifications.
+	aCollector omniscientCollectItem: item
+	'
 ]
 
 { #category : #'benchmarks - tools' }
@@ -484,4 +529,19 @@ OMBenchmark >> showSlowdown: results [
 { #category : #'benchmarks - tools' }
 OMBenchmark >> timeToBench [
 	^ 2 seconds
+]
+
+{ #category : #'benchmarks - tools' }
+OMBenchmark >> uninstallCollectorsContextBehavior [
+
+	CollectBehavior compile: 
+	'omniscientCollect: anObject in: aCollector withReifications: anArrayOfReifications
+	| item |
+	item := self omniscientItemClass new.
+	item rawData: anArrayOfReifications.
+	item reificationSpec: aCollector reifications.
+	
+	aCollector applyTransformationsTo: item from: anArrayOfReifications.
+	aCollector omniscientCollectItem: item
+	'
 ]
