@@ -203,8 +203,16 @@ OMBenchmark >> benchReferenceFullInstrumentationNoStack [
 OMBenchmark >> benchReferenceMemoryFullInstrumentationNoStack [
 	| inst |
 	inst := OMBenchmark new.
-	inst bool: true.
 	self timeAndMemoryProfile: [ inst referenceFullInstrumentation ]
+]
+
+{ #category : #'benchmark - memory' }
+OMBenchmark >> benchReferenceMemoryNoInstrumentation [
+	| inst |
+	Smalltalk garbageCollect.
+	inst := OMBenchmark new.
+	self timeAndMemoryProfile:[ inst referenceNoInstrumentation]
+	
 ]
 
 { #category : #'benchmark - memory' }
@@ -212,8 +220,7 @@ OMBenchmark >> benchReferenceMemorySimpleInstrumentation [
 	| inst |
 	Smalltalk garbageCollect.
 	inst := OMBenchmark new.
-	inst bool: true.
-	self timeAndMemoryProfile:[ inst referenceSimpleInstrumentationWithContext]
+	self timeAndMemoryProfile:[ inst referenceWithSimpleInstrumentation]
 	
 ]
 
@@ -618,7 +625,7 @@ OMBenchmark >> simpleItems: anObject [
 
 { #category : #'benchmarks - tools' }
 OMBenchmark >> timeAndMemoryProfile: aBlock [
-	TimeProfiler spyOn: [ 10000000 timesRepeat: aBlock ]
+	TimeProfiler spyOn: [ 1000000 timesRepeat: aBlock ]
 ]
 
 { #category : #'benchmarks - tools' }
