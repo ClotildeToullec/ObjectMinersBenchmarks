@@ -2,7 +2,8 @@ Class {
 	#name : #OMBenchmark,
 	#superclass : #Object,
 	#instVars : [
-		'simpleItems'
+		'simpleItems',
+		'bool'
 	],
 	#category : #ObjectMinersBenchmarks
 }
@@ -12,6 +13,10 @@ OMBenchmark class >> bench [
 	<script>
 	Smalltalk garbageCollect.
 	^ self new benchAll
+]
+
+{ #category : #'benchmarks - tools' }
+OMBenchmark >> actionMethod [
 ]
 
 { #category : #'benchmarks - tools' }
@@ -101,6 +106,44 @@ OMBenchmark >> benchMinersWithReifications [
 ]
 
 { #category : #'benchmark - references' }
+OMBenchmark >> benchReferenceActionInstrumentation [ 
+	|inst|
+	inst := OMBenchmark new.	
+	 ^self bench: [inst referenceActionInstrumentation  ] 
+]
+
+{ #category : #'benchmark - references' }
+OMBenchmark >> benchReferenceActionWithReificationsInstrumentation [ 
+	|inst|
+	inst := OMBenchmark new.	
+	 ^self bench: [inst referenceActionWithReificationsInstrumentation  ] 
+]
+
+{ #category : #'benchmark - references' }
+OMBenchmark >> benchReferenceFalseConditionInstrumentation [ 
+	|inst|
+	inst := OMBenchmark new.
+	inst bool: false.
+	 ^self bench: [inst referenceConditionInstrumentation  ] 
+]
+
+{ #category : #'benchmark - references' }
+OMBenchmark >> benchReferenceFalseConditionWithReificationsInstrumentation [ 
+	|inst|
+	inst := OMBenchmark new.
+	inst bool: false.
+	 ^self bench: [inst referenceConditionWithReificationsInstrumentation  ] 
+]
+
+{ #category : #'benchmark - references' }
+OMBenchmark >> benchReferenceFullInstrumentationNoStack [ 
+	|inst|
+	inst := OMBenchmark new.
+	inst bool: true.	
+	 ^self bench: [inst referenceFullInstrumentation  ] 
+]
+
+{ #category : #'benchmark - references' }
 OMBenchmark >> benchReferenceNoInstrumentation [ 
 	|inst|
 	inst := OMBenchmark new.
@@ -129,10 +172,31 @@ OMBenchmark >> benchReferenceSimpleInstrumentation [
 ]
 
 { #category : #'benchmark - references' }
+OMBenchmark >> benchReferenceTrueConditionInstrumentation [ 
+	|inst|
+	inst := OMBenchmark new.
+	inst bool: true.
+	 ^self bench: [inst referenceConditionInstrumentation  ] 
+]
+
+{ #category : #'benchmark - references' }
+OMBenchmark >> benchReferenceTrueConditionWithReificationsInstrumentation [ 
+	|inst|
+	inst := OMBenchmark new.
+	inst bool: true.
+	 ^self bench: [inst referenceConditionWithReificationsInstrumentation  ] 
+]
+
+{ #category : #'benchmark - references' }
 OMBenchmark >> benchReferenceWithReificationsInstrumentation [ 
 	|inst|
 	inst := OMBenchmark new.
 	 ^self bench: [inst referenceWithReificationsInstrumentation  ] 
+]
+
+{ #category : #accessing }
+OMBenchmark >> bool: anObject [
+	bool := anObject
 ]
 
 { #category : #'benchmarks - tools' }
@@ -243,6 +307,78 @@ OMBenchmark >> profileMinersWithReifications [
 ]
 
 { #category : #'reference methods' }
+OMBenchmark >> referenceActionInstrumentation [
+	simpleItems add: (10 squared + 1) asString.
+	self actionMethod
+]
+
+{ #category : #'reference methods' }
+OMBenchmark >> referenceActionWithReificationsInstrumentation [
+	| value receiver reifications |
+	reifications := OrderedCollection new.
+	receiver := 10 squared + 1.
+	value := receiver asString.
+	reifications add: value.
+	reifications add: #asString.
+	reifications add: OMBenchmark.
+	reifications add: self.
+	reifications add: receiver.
+	simpleItems add: reifications.
+	self actionMethod
+]
+
+{ #category : #'reference methods' }
+OMBenchmark >> referenceConditionInstrumentation [
+	bool
+		ifTrue: [ simpleItems add: (10 squared + 1) asString ]
+]
+
+{ #category : #'reference methods' }
+OMBenchmark >> referenceConditionWithReificationsInstrumentation [
+	| value receiver reifications |
+	reifications := OrderedCollection new.
+	receiver := 10 squared + 1.
+	value := receiver asString.
+	reifications add: value.
+	reifications add: #asString.
+	reifications add: OMBenchmark.
+	reifications add: self.
+	reifications add: receiver.
+	bool
+		ifTrue: [ simpleItems add: reifications ]
+]
+
+{ #category : #'reference methods' }
+OMBenchmark >> referenceFullInstrumentation [
+	|rcv reifs subs temp1 temp2 temp3|
+	
+	subs := OrderedCollection new.
+	
+	rcv := 10.
+	temp1 := rcv squared.
+	reifs := OrderedCollection new.
+	reifs add: temp1; add: #squared; add: OMBenchmark; add: self; add: rcv.
+	subs add: reifs.
+	
+	rcv := temp1.
+	temp2 := temp1 + 1.
+	reifs := OrderedCollection new.
+	reifs add: temp2; add: #+; add: OMBenchmark; add: self; add: rcv.
+	subs add: reifs.
+	
+	rcv := temp2.
+	temp3 := temp2 asString.
+	reifs := OrderedCollection new.
+	reifs add: temp3; add: #asString; add: OMBenchmark; add: self; add: rcv.
+	subs add: reifs.	
+	
+	bool ifTrue:[
+	simpleItems add: subs].
+
+	self actionMethod
+]
+
+{ #category : #'reference methods' }
 OMBenchmark >> referenceNoInstrumentation [
 	(10 squared + 1) asString
 ]
@@ -282,7 +418,9 @@ OMBenchmark >> referenceReificationsWithIntermediateInstrumentation [
 	reifs add: temp3; add: #asString; add: OMBenchmark; add: self; add: rcv.
 	subs add: reifs.	
 	
+
 	simpleItems add: subs
+
 ]
 
 { #category : #'reference methods' }
