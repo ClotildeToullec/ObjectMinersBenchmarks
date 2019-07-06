@@ -23,6 +23,13 @@ OMBenchmark class >> benchMinerMemorySimpleInstrumentation [
 ]
 
 { #category : #benchmarking }
+OMBenchmark class >> benchMinersMemoryFullInstrumentationNoStack [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new benchMinersMemoryFullInstrumentationNoStack
+]
+
+{ #category : #benchmarking }
 OMBenchmark class >> benchReferenceMemoryFullInstrumentationNoStack [
 	<script>
 	Smalltalk garbageCollect.
@@ -110,6 +117,18 @@ OMBenchmark >> benchMinersIntermediateAndReifications [
 	res := self benchMiner.
 	miner uninstall.
 	^ res
+]
+
+{ #category : #'benchmark - memory' }
+OMBenchmark >> benchMinersMemoryFullInstrumentationNoStack [
+	| miner inst |
+	Smalltalk garbageCollect.
+	self flag: 'configure miner'.
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner install.
+	inst := OMBenchmark new.
+	self timeAndMemoryProfile: [ inst minerInstrumentedMethod ].
+	miner uninstall
 ]
 
 { #category : #benchmarks }
@@ -210,6 +229,7 @@ OMBenchmark >> benchReferenceFullInstrumentationNoStack [
 OMBenchmark >> benchReferenceMemoryFullInstrumentationNoStack [
 	| inst |
 	inst := OMBenchmark new.
+	inst bool: true.
 	self timeAndMemoryProfile: [ inst referenceFullInstrumentation ]
 ]
 
@@ -295,6 +315,31 @@ OMBenchmark >> benchReferenceWithReificationsInstrumentation [
 	|inst|
 	inst := OMBenchmark new.
 	 ^self bench: [inst referenceWithReificationsInstrumentation  ] 
+]
+
+{ #category : #'benchmark - memory' }
+OMBenchmark >> benchmarkSimpleInstrumentationMemory [
+	| no reference miner results|
+	Smalltalk garbageCollect.
+	no := self class new benchReferenceMemoryNoInstrumentation.
+	Smalltalk garbageCollect.
+	reference := self class new benchReferenceMemorySimpleInstrumentation.
+	Smalltalk garbageCollect.
+	miner := self class new benchMinerMemorySimpleInstrumentation.
+	results := WriteStream on: String new.
+	results nextPutAll: 'no: ', no printString, 'bytes'.
+	results cr.
+	results nextPutAll: 'reference: ', reference printString, 'bytes'.
+	results cr.
+	results nextPutAll: 'miners: ', miner printString, 'bytes'.
+	results cr.
+	results nextPutAll: 'reference/no: x', (reference/no) asFloat printString.
+	results cr.
+	results nextPutAll: 'miners/no: x', (miner/no) asFloat printString.
+	results cr.
+	results nextPutAll: 'miners/reference: x', (miner/reference) asFloat printString.
+	^results contents
+	
 ]
 
 { #category : #accessing }
@@ -632,7 +677,18 @@ OMBenchmark >> simpleItems: anObject [
 
 { #category : #'benchmarks - tools' }
 OMBenchmark >> timeAndMemoryProfile: aBlock [
-	TimeProfiler spyOn: [ 1000000 timesRepeat: aBlock ]
+	1000000 timesRepeat: aBlock.
+	((SpaceTally new
+		spaceTally:
+			{Array.
+			OmniscientItem.
+			ObjectMiner.
+			Collector.
+			OrderedCollection.
+			SmallInteger.
+			Set.
+			ByteString}) inject: 0 into: [ :t :s | t + s spaceForInstances ])
+		inspect
 ]
 
 { #category : #'benchmarks - tools' }
