@@ -85,6 +85,17 @@ OMBenchmark >> benchMinersRecordIntermediate [
 ]
 
 { #category : #benchmarks }
+OMBenchmark >> benchMinersReplay [
+	| miner res |
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner install.
+	self setReplayForMiner: miner.
+	res := self benchMiner.
+	miner uninstall.
+	^ res
+]
+
+{ #category : #benchmarks }
 OMBenchmark >> benchMinersSimple [
 	| miner res |
 	miner := ObjectMiner new reachFromAST: self astForMiner.
@@ -175,6 +186,14 @@ OMBenchmark >> benchReferenceRecordIntermediateWithReificationsInstrumentation [
 	|inst|
 	inst := OMBenchmark new.
 	 ^self bench: [inst referenceReificationsWithIntermediateInstrumentation  ] 
+]
+
+{ #category : #'benchmark - references' }
+OMBenchmark >> benchReferenceReplayInstrumentation [ 
+	|inst|
+	inst := OMBenchmark new.
+	inst simpleItems: #(1 1 1 1 1 1 1 1 1 1).
+	 ^self bench: [inst referenceReplayInstrumentation  ] 
 ]
 
 { #category : #'benchmark - references' }
@@ -444,6 +463,11 @@ OMBenchmark >> referenceReificationsWithIntermediateInstrumentation [
 ]
 
 { #category : #'reference methods' }
+OMBenchmark >> referenceReplayInstrumentation [
+	(10 squared + (simpleItems at: 5)) asString
+]
+
+{ #category : #'reference methods' }
 OMBenchmark >> referenceSimpleInstrumentationWithContext [
 	|context|
 	context := thisContext.
@@ -493,6 +517,17 @@ OMBenchmark >> reinstallCollectorsContextBehavior [
 ]
 
 { #category : #'benchmarks - tools' }
+OMBenchmark >> setReplayForMiner: miner [
+	|node rawData record|
+	node := self astForMiner allChildren last.
+	rawData := {nil. 1. node. nil.}.
+	record := OmniscientItem new.
+	record rawData: rawData.
+	miner replayRecord: record 
+	
+]
+
+{ #category : #'benchmarks - tools' }
 OMBenchmark >> showSlowdown: results [
 	| computingBlock dict |
 	computingBlock := [ :ref :res | (ref / res round: 2) asFloat - 1 ].
@@ -524,6 +559,11 @@ OMBenchmark >> showSlowdown: results [
 				value: (results at: 'Reference record intermediate') frequency
 				value: (results at: 'Miner Record Intermediate Objects') frequency).
 	^ dict
+]
+
+{ #category : #accessing }
+OMBenchmark >> simpleItems: anObject [
+	simpleItems := anObject
 ]
 
 { #category : #'benchmarks - tools' }
