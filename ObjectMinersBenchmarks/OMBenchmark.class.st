@@ -98,13 +98,14 @@ OMBenchmark >> benchMiner [
 
 { #category : #'benchmark - memory' }
 OMBenchmark >> benchMinerMemorySimpleInstrumentation [
-	| miner inst |
+	| miner inst res|
 	Smalltalk garbageCollect.
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner install.
 	inst := OMBenchmark new.
-	self timeAndMemoryProfile: [ inst minerInstrumentedMethod ].
-	miner uninstall
+	res := self timeAndMemoryProfile: [ inst minerInstrumentedMethod ].
+	miner uninstall.
+	^res
 ]
 
 { #category : #benchmarks }
@@ -121,14 +122,15 @@ OMBenchmark >> benchMinersIntermediateAndReifications [
 
 { #category : #'benchmark - memory' }
 OMBenchmark >> benchMinersMemoryFullInstrumentationNoStack [
-	| miner inst |
+	| miner inst res|
 	Smalltalk garbageCollect.
 	self flag: 'configure miner'.
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner install.
 	inst := OMBenchmark new.
-	self timeAndMemoryProfile: [ inst minerInstrumentedMethod ].
-	miner uninstall
+	res := self timeAndMemoryProfile: [ inst minerInstrumentedMethod ].
+	miner uninstall.
+	^res
 ]
 
 { #category : #benchmarks }
@@ -230,7 +232,7 @@ OMBenchmark >> benchReferenceMemoryFullInstrumentationNoStack [
 	| inst |
 	inst := OMBenchmark new.
 	inst bool: true.
-	self timeAndMemoryProfile: [ inst referenceFullInstrumentation ]
+	^self timeAndMemoryProfile: [ inst referenceFullInstrumentation ]
 ]
 
 { #category : #'benchmark - memory' }
@@ -238,7 +240,7 @@ OMBenchmark >> benchReferenceMemoryNoInstrumentation [
 	| inst |
 	Smalltalk garbageCollect.
 	inst := OMBenchmark new.
-	self timeAndMemoryProfile:[ inst referenceNoInstrumentation]
+	^self timeAndMemoryProfile:[ inst referenceNoInstrumentation]
 	
 ]
 
@@ -247,7 +249,7 @@ OMBenchmark >> benchReferenceMemorySimpleInstrumentation [
 	| inst |
 	Smalltalk garbageCollect.
 	inst := OMBenchmark new.
-	self timeAndMemoryProfile:[ inst referenceWithSimpleInstrumentation]
+	^self timeAndMemoryProfile:[ inst referenceWithSimpleInstrumentation]
 	
 ]
 
@@ -678,7 +680,7 @@ OMBenchmark >> simpleItems: anObject [
 { #category : #'benchmarks - tools' }
 OMBenchmark >> timeAndMemoryProfile: aBlock [
 	1000000 timesRepeat: aBlock.
-	((SpaceTally new
+	^ (SpaceTally new
 		spaceTally:
 			{Array.
 			OmniscientItem.
@@ -687,8 +689,7 @@ OMBenchmark >> timeAndMemoryProfile: aBlock [
 			OrderedCollection.
 			SmallInteger.
 			Set.
-			ByteString}) inject: 0 into: [ :t :s | t + s spaceForInstances ])
-		inspect
+			ByteString}) inject: 0 into: [ :t :s | t + s spaceForInstances ]
 ]
 
 { #category : #'benchmarks - tools' }
