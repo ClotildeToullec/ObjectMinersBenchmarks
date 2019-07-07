@@ -70,22 +70,79 @@ OMBenchmark >> benchAll [
 	| results |
 	results := Dictionary new.
 	results
-		at: 'Reference no instrumentation'
+		"Simple"
+		at: 'Reference No Instrumentation'
 			put: self benchReferenceNoInstrumentation;
-		at: 'Reference simple instrumentation'
+		at: 'Reference Simple Instrumentation'
 			put: self benchReferenceSimpleInstrumentation;
-		at: 'Reference record intermediate'
-			put: self benchReferenceRecordIntermediateInstrumentation;
-		at: 'Reference With Reifications'
-			put: self benchReferenceWithReificationsInstrumentation;
-		at: 'Reference Record Intermediate Objects, with reifications'
-			put: self benchReferenceRecordIntermediateWithReificationsInstrumentation;
 		at: 'Miner Simple' put: self benchMinersSimple;
+		
+		"Intermediate"
+		at: 'Reference Record Intermediate Objects'
+			put: self benchReferenceRecordIntermediateInstrumentation;
 		at: 'Miner Record Intermediate Objects'
 			put: self benchMinersRecordIntermediate;
+			
+		"Reifications"
+		at: 'Reference With Reifications'
+			put: self benchReferenceWithReificationsInstrumentation;
 		at: 'Miner With Reifications' put: self benchMinersWithReifications;
+		
+		"Intermediate + refifications"
+		at: 'Reference Record Intermediate Objects, with reifications'
+			put: self benchReferenceRecordIntermediateWithReificationsInstrumentation;
 		at: 'Miner Record Intermediate Objects, with reifications'
-			put: self benchMinersIntermediateAndReifications.
+			put: self benchMinersIntermediateAndReifications;
+			
+		"Action"
+		at: 'Reference Action'
+			put: self benchReferenceActionInstrumentation;
+		at: 'Miner Action Instrumentation' put: self benchMinersAction;
+		
+		"Action + reifications"
+		at: 'Reference Action With Reifications'
+			put: self benchReferenceActionWithReificationsInstrumentation;
+		at: 'Miner Action With Reifications'
+			put: self benchMinersActionWithReifications;
+			
+		"False Condition"
+		at: 'Reference False Condition'
+			put: self benchReferenceFalseConditionInstrumentation;
+		at: 'Miner False Condition' put: self benchMinersFalseCondition;
+		
+		"False Condition + Reifications"
+		at: 'Reference False Condition With Reifications'
+			put: self benchReferenceFalseConditionWithReificationsInstrumentation;
+		at: 'Miner False Condition With Reifications'
+			put: self benchMinersFalseConditionWithReifications;
+			
+		"Full Instrumentation No Stack"
+		at: 'Reference Full Instrumentation No Stack'
+			put: self benchReferenceFullInstrumentationNoStack;
+		at: 'Miner Full No Stack'
+			put: self benchMinersFullNoStack;
+			
+		"Replay"
+		at: 'Reference Replay'
+			put: self benchReferenceReplayInstrumentation;
+		at: 'Miner Replay' put: self benchMinersReplay;
+		
+		"Simple With Context"
+		at: 'Refenrence Simple With Context'
+			put: self benchReferenceSimpleInstrumentationWithContext;
+		at: 'Miner Simple With Context'
+			put: self benchMinersSimpleWithContext;
+			
+		"True Condition"
+		at: 'Reference True Condition'
+			put: self benchReferenceTrueConditionInstrumentation;
+		at: 'Miner True Condition' put: self benchMinersTrueCondition;
+		
+		"True Condition + Reifications"
+		at: 'Reference True Condition With Reifications'
+			put: self benchReferenceTrueConditionWithReificationsInstrumentation;
+		at: 'Miner True Condition With Reifications'
+			put: self benchMinersTrueConditionWithReifications.
 	(self computeSlowdown: results) inspect
 ]
 
@@ -106,6 +163,95 @@ OMBenchmark >> benchMinerMemorySimpleInstrumentation [
 	res := self timeAndMemoryProfile: [ inst minerInstrumentedMethod ].
 	miner uninstall.
 	^res
+]
+
+{ #category : #benchmarks }
+OMBenchmark >> benchMinersAction [
+	| miner res |
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner captureContext: #(object).
+	miner
+		setAction:
+			(CollectEvaluation new
+				source: 'object actionMethod. Halt once';
+				yourself).
+	self flag: 'What are the reifs ? value ? object ?'.
+	miner install.
+	res := self benchMiner.
+	miner uninstall.
+	^ res
+]
+
+{ #category : #benchmarks }
+OMBenchmark >> benchMinersActionWithReifications [
+	| miner res |
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner captureContext: self reificationsForMiner.
+	miner
+		setAction:
+			(CollectEvaluation new
+				source: 'object actionMethod. Halt once';
+				yourself).
+	self flag: 'Configure action + Reifications'.
+	miner install.
+	res := self benchMiner.
+	miner uninstall.
+	^ res
+]
+
+{ #category : #benchmarks }
+OMBenchmark >> benchMinersFalseCondition [
+	| miner res |
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner
+		setCondition:
+			(CollectEvaluation new
+				source: 'false';
+				yourself).
+	miner install.
+	res := self benchMiner.
+	miner uninstall.
+	^ res
+]
+
+{ #category : #benchmarks }
+OMBenchmark >> benchMinersFalseConditionWithReifications [
+	| miner res |
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner captureContext: self reificationsForMiner.
+	miner
+		setCondition:
+			(CollectEvaluation new
+				source: 'false';
+				yourself).
+	miner install.
+	res := self benchMiner.
+	miner uninstall.
+	^ res
+]
+
+{ #category : #benchmarks }
+OMBenchmark >> benchMinersFullNoStack [
+	| miner res |
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner captureContext: self reificationsForMiner.
+	miner
+		setCondition:
+			(CollectEvaluation new
+				source: 'true';
+				yourself).
+	miner
+		setAction:
+			(CollectEvaluation new
+				source: 'value actionMethod';
+				yourself).
+	miner recordIntermediateObjects: true.
+	self setReplayForMiner: miner.
+	self flag: 'Configure all. Context ?? Action ??'.
+	miner install.
+	res := self benchMiner.
+	miner uninstall.
+	^ res
 ]
 
 { #category : #benchmarks }
@@ -170,11 +316,46 @@ OMBenchmark >> benchMinersSimpleWithContext [
 	| miner res |
 	self reinstallCollectorsContextBehavior.
 	miner := ObjectMiner new reachFromAST: self astForMiner.
-	self flag: 'Set the context as reification'.
+	miner
+		captureContext:
+			(self reificationsForMiner asOrderedCollection
+				add: #context;
+				yourself).
 	miner install.
 	res := self benchMiner.
 	miner uninstall.
 	self uninstallCollectorsContextBehavior.
+	^ res
+]
+
+{ #category : #benchmarks }
+OMBenchmark >> benchMinersTrueCondition [
+	| miner res |
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner
+		setCondition:
+			(CollectEvaluation new
+				source: 'true';
+				yourself).
+	miner install.
+	res := self benchMiner.
+	miner uninstall.
+	^ res
+]
+
+{ #category : #benchmarks }
+OMBenchmark >> benchMinersTrueConditionWithReifications [
+	| miner res |
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner captureContext: self reificationsForMiner.
+	miner
+		setCondition:
+			(CollectEvaluation new
+				source: 'true';
+				yourself).
+	miner install.
+	res := self benchMiner.
+	miner uninstall.
 	^ res
 ]
 
