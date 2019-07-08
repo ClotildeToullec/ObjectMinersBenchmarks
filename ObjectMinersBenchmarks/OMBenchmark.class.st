@@ -173,9 +173,8 @@ OMBenchmark >> benchMinersAction [
 	miner
 		setAction:
 			(CollectEvaluation new
-				source: 'object actionMethod. Halt once';
+				source: 'object actionMethod.';
 				yourself).
-	self flag: 'What are the reifs ? value ? object ?'.
 	miner install.
 	res := self benchMiner.
 	miner uninstall.
@@ -190,9 +189,8 @@ OMBenchmark >> benchMinersActionWithReifications [
 	miner
 		setAction:
 			(CollectEvaluation new
-				source: 'object actionMethod. Halt once';
+				source: 'object actionMethod.';
 				yourself).
-	self flag: 'Configure action + Reifications'.
 	miner install.
 	res := self benchMiner.
 	miner uninstall.
@@ -243,11 +241,9 @@ OMBenchmark >> benchMinersFullNoStack [
 	miner
 		setAction:
 			(CollectEvaluation new
-				source: 'value actionMethod';
+				source: 'object actionMethod';
 				yourself).
 	miner recordIntermediateObjects: true.
-	self setReplayForMiner: miner.
-	self flag: 'Configure all. Context ?? Action ??'.
 	miner install.
 	res := self benchMiner.
 	miner uninstall.
