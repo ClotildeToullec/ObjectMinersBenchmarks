@@ -97,7 +97,7 @@ OMBenchmark >> benchAll [
 		"Action"
 		at: 'Reference Action'
 			put: self benchReferenceActionInstrumentation;
-		at: 'Miner Action Instrumentation' put: self benchMinersAction;
+		at: 'Miner Action' put: self benchMinersAction;
 		
 		"Action + reifications"
 		at: 'Reference Action With Reifications'
@@ -201,10 +201,11 @@ OMBenchmark >> benchMinersActionWithReifications [
 OMBenchmark >> benchMinersFalseCondition [
 	| miner res |
 	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner captureContext: #(object).
 	miner
 		setCondition:
 			(CollectEvaluation new
-				source: 'false';
+				source: 'object bool';
 				yourself).
 	miner install.
 	res := self benchMiner.
@@ -220,7 +221,7 @@ OMBenchmark >> benchMinersFalseConditionWithReifications [
 	miner
 		setCondition:
 			(CollectEvaluation new
-				source: 'false';
+				source: 'object bool';
 				yourself).
 	miner install.
 	res := self benchMiner.
@@ -324,10 +325,11 @@ OMBenchmark >> benchMinersSimpleWithContext [
 OMBenchmark >> benchMinersTrueCondition [
 	| miner res |
 	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner captureContext: #(object).
 	miner
 		setCondition:
 			(CollectEvaluation new
-				source: 'true';
+				source: 'object bool';
 				yourself).
 	miner install.
 	res := self benchMiner.
@@ -343,7 +345,7 @@ OMBenchmark >> benchMinersTrueConditionWithReifications [
 	miner
 		setCondition:
 			(CollectEvaluation new
-				source: 'true';
+				source: 'object bool';
 				yourself).
 	miner install.
 	res := self benchMiner.
@@ -518,6 +520,11 @@ OMBenchmark >> benchmarkSimpleInstrumentationMemory [
 ]
 
 { #category : #accessing }
+OMBenchmark >> bool [
+	^ bool
+]
+
+{ #category : #accessing }
 OMBenchmark >> bool: anObject [
 	bool := anObject
 ]
@@ -597,7 +604,7 @@ OMBenchmark >> computeSlowdown: results [
 			(self
 				computeSlowdownBetween: (results at: 'Reference No Instrumentation') frequency
 				instrumented: (results at: 'Reference Full Instrumentation No Stack') frequency
-				miners: (results at: 'Miner Full Instrumentation No Stack') frequency).
+				miners: (results at: 'Miner Full No Stack') frequency).
 	"Replay"
 	dict
 		at: 'Replay'
@@ -636,7 +643,7 @@ OMBenchmark >> computeSlowdown: results [
 { #category : #'benchmarks - tools' }
 OMBenchmark >> computeSlowdownBetween: reference instrumented: instrumented miners: miners [
 	| computingBlock col |
-	computingBlock := [ :ref :res | (ref / res round: 2) asFloat - 1 ].
+	computingBlock := [ :ref :res | (ref / res round: 2) asFloat "- 1" ].
 	col := OrderedCollection new.
 	col add: ('Instrumented/Reference slowdown' -> (computingBlock value: reference value: instrumented)).
 	col add: ('Miners/Reference slowdown' -> (computingBlock value: reference value: miners)).
@@ -728,7 +735,7 @@ OMBenchmark >> referenceActionWithReificationsInstrumentation [
 
 { #category : #'reference methods' }
 OMBenchmark >> referenceConditionInstrumentation [
-	bool
+	self bool
 		ifTrue: [ simpleItems add: (10 squared + 1) asString ]
 ]
 
@@ -743,7 +750,7 @@ OMBenchmark >> referenceConditionWithReificationsInstrumentation [
 	reifications add: OMBenchmark.
 	reifications add: self.
 	reifications add: receiver.
-	bool
+	self bool
 		ifTrue: [ simpleItems add: reifications ]
 ]
 
@@ -771,7 +778,7 @@ OMBenchmark >> referenceFullInstrumentation [
 	reifs add: temp3; add: #asString; add: OMBenchmark; add: self; add: rcv.
 	subs add: reifs.	
 	
-	bool ifTrue:[
+	self bool ifTrue:[
 	simpleItems add: subs].
 
 	self actionMethod
