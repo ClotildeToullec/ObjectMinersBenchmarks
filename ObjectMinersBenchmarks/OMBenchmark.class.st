@@ -513,6 +513,17 @@ OMBenchmark >> benchReferenceWithReificationsInstrumentation [
 	 ^self bench: [inst referenceWithReificationsInstrumentation  ] 
 ]
 
+{ #category : #'unary benchmark' }
+OMBenchmark >> benchResultsRef: refResult miner: minerResult [
+	| result |
+	result := Dictionary new.
+	result
+		at: 'Reference' put: self benchReferenceNoInstrumentation;
+		at: 'Instrumentation' put: refResult;
+		at: 'Miner' put: minerResult.
+	(self computeSlowdownOf: result) inspect
+]
+
 { #category : #'benchmark - memory' }
 OMBenchmark >> benchmarkFullInstrumentationMemory [
 	| no reference miner results |
@@ -695,6 +706,14 @@ OMBenchmark >> computeSlowdownBetween: reference instrumented: instrumented mine
 	col add: ('Miners/Reference slowdown' -> (computingBlock value: reference value: miners)).
 	col add: ('Miners/Instrumented' -> (computingBlock value: instrumented value: miners)).
 	^col
+]
+
+{ #category : #'unary benchmark' }
+OMBenchmark >> computeSlowdownOf: result [
+	^ self
+		computeSlowdownBetween: (result at: 'Reference') frequency
+		instrumented: (result at: 'Instrumentation') frequency
+		miners: (result at: 'Miner') frequency
 ]
 
 { #category : #initialize }
