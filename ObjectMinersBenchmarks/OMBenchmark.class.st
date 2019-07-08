@@ -89,9 +89,9 @@ OMBenchmark >> benchAll [
 		at: 'Miner With Reifications' put: self benchMinersWithReifications;
 		
 		"Intermediate + refifications"
-		at: 'Reference Record Intermediate Objects, with reifications'
+		at: 'Reference Record Intermediate Objects With reifications'
 			put: self benchReferenceRecordIntermediateWithReificationsInstrumentation;
-		at: 'Miner Record Intermediate Objects, with reifications'
+		at: 'Miner Record Intermediate Objects With reifications'
 			put: self benchMinersIntermediateAndReifications;
 			
 		"Action"
@@ -128,7 +128,7 @@ OMBenchmark >> benchAll [
 		at: 'Miner Replay' put: self benchMinersReplay;
 		
 		"Simple With Context"
-		at: 'Refenrence Simple With Context'
+		at: 'Reference Simple With Context'
 			put: self benchReferenceSimpleInstrumentationWithContext;
 		at: 'Miner Simple With Context'
 			put: self benchMinersSimpleWithContext;
@@ -534,34 +534,110 @@ OMBenchmark >> bool: anObject [
 OMBenchmark >> computeSlowdown: results [
 	| dict |
 	dict := Dictionary new.
+	"Simple"
 	dict
 		at: 'Simple instrumentation'
 		put:
 			(self
-				computeSlowdownBetween: (results at: 'Reference no instrumentation') frequency
-				instrumented: (results at: 'Reference simple instrumentation') frequency
+				computeSlowdownBetween: (results at: 'Reference No Instrumentation') frequency
+				instrumented: (results at: 'Reference Simple Instrumentation') frequency
 				miners: (results at: 'Miner Simple') frequency).
+	"Intermediate"
 	dict
-		at: 'Record intermediate'
+		at: 'Record Intermediate'
 		put:
 			(self
-				computeSlowdownBetween: (results at: 'Reference no instrumentation') frequency
-				instrumented: (results at: 'Reference record intermediate') frequency
+				computeSlowdownBetween: (results at: 'Reference No Instrumentation') frequency
+				instrumented: (results at: 'Reference Record Intermediate Objects') frequency
 				miners: (results at: 'Miner Record Intermediate Objects') frequency).
+	"Reifications"
 	dict
 		at: 'Reifications'
 		put:
 			(self
-				computeSlowdownBetween: (results at: 'Reference no instrumentation') frequency
+				computeSlowdownBetween: (results at: 'Reference No Instrumentation') frequency
 				instrumented: (results at: 'Reference With Reifications') frequency
 				miners: (results at: 'Miner With Reifications') frequency).
+	"Intermediate + refifications"
 	dict
 		at: 'Record intermediate + reifications'
 		put:
 			(self
-				computeSlowdownBetween: (results at: 'Reference no instrumentation') frequency
-				instrumented: (results at: 'Reference Record Intermediate Objects, with reifications') frequency
-				miners: (results at: 'Miner Record Intermediate Objects, with reifications') frequency).
+				computeSlowdownBetween: (results at: 'Reference No Instrumentation') frequency
+				instrumented: (results at: 'Reference Record Intermediate Objects With reifications') frequency
+				miners: (results at: 'Miner Record Intermediate Objects With reifications') frequency).
+	"Action"
+	dict
+		at: 'Action'
+		put:
+			(self
+				computeSlowdownBetween: (results at: 'Reference No Instrumentation') frequency
+				instrumented: (results at: 'Reference Action') frequency
+				miners: (results at: 'Miner Action') frequency).
+	"Action + reifications"
+	dict
+		at: 'Action With Reifications'
+		put:
+			(self
+				computeSlowdownBetween: (results at: 'Reference No Instrumentation') frequency
+				instrumented: (results at: 'Reference Action With Reifications') frequency
+				miners: (results at: 'Miner Action With Reifications') frequency).
+	"False Condition"
+	dict
+		at: 'False Condition'
+		put:
+			(self
+				computeSlowdownBetween: (results at: 'Reference No Instrumentation') frequency
+				instrumented: (results at: 'Reference False Condition') frequency
+				miners: (results at: 'Miner False Condition') frequency).
+	"False Condition + Reifications"
+	dict
+		at: 'False Condition With Reifications'
+		put:
+			(self
+				computeSlowdownBetween: (results at: 'Reference No Instrumentation') frequency
+				instrumented: (results at: 'Reference False Condition With Reifications') frequency
+				miners: (results at: 'Miner False Condition With Reifications') frequency).
+	"Full Instrumentation No Stack"
+	dict
+		at: 'Full Instrumentation No Stack'
+		put:
+			(self
+				computeSlowdownBetween: (results at: 'Reference No Instrumentation') frequency
+				instrumented: (results at: 'Reference Full Instrumentation No Stack') frequency
+				miners: (results at: 'Miner Full Instrumentation No Stack') frequency).
+	"Replay"
+	dict
+		at: 'Replay'
+		put:
+			(self
+				computeSlowdownBetween: (results at: 'Reference No Instrumentation') frequency
+				instrumented: (results at: 'Reference Replay') frequency
+				miners: (results at: 'Miner Replay') frequency).
+	"Simple With Context"
+	dict
+		at: 'Simple With Context'
+		put:
+			(self
+				computeSlowdownBetween: (results at: 'Reference No Instrumentation') frequency
+				instrumented: (results at: 'Reference Simple With Context') frequency
+				miners: (results at: 'Miner Simple With Context') frequency).
+	"True Condition"
+	dict
+		at: 'True Condition'
+		put:
+			(self
+				computeSlowdownBetween: (results at: 'Reference No Instrumentation') frequency
+				instrumented: (results at: 'Reference True Condition') frequency
+				miners: (results at: 'Miner True Condition') frequency).
+	"True Condition + Reifications"
+	dict
+		at: 'True Condition With Reifications'
+		put:
+			(self
+				computeSlowdownBetween: (results at: 'Reference No Instrumentation') frequency
+				instrumented: (results at: 'Reference True Condition With Reifications') frequency
+				miners: (results at: 'Miner True Condition With Reifications') frequency).
 	^ dict
 ]
 
