@@ -16,6 +16,14 @@ OMBenchmark class >> bench [
 ]
 
 { #category : #benchmarking }
+OMBenchmark class >> benchMemory [
+	<script>
+	Smalltalk garbageCollect.
+	self new benchmarkSimpleInstrumentationMemory inspectWithLabel: 'Simple'.
+	self new benchmarkFullInstrumentationMemory inspectWithLabel: 'Full' .
+]
+
+{ #category : #benchmarking }
 OMBenchmark class >> benchMinerMemorySimpleInstrumentation [
 	<script>
 	Smalltalk garbageCollect.
@@ -237,7 +245,7 @@ OMBenchmark >> benchMinersFullNoStack [
 	miner
 		setCondition:
 			(CollectEvaluation new
-				source: 'true';
+				source: 'object bool';
 				yourself).
 	miner
 		setAction:
@@ -265,15 +273,26 @@ OMBenchmark >> benchMinersIntermediateAndReifications [
 
 { #category : #'benchmark - memory' }
 OMBenchmark >> benchMinersMemoryFullInstrumentationNoStack [
-	| miner inst res|
+	| miner inst res |
 	Smalltalk garbageCollect.
-	self flag: 'configure miner'.
 	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner captureContext: self reificationsForMiner.
+	miner
+		setCondition:
+			(CollectEvaluation new
+				source: 'object bool';
+				yourself).
+	miner
+		setAction:
+			(CollectEvaluation new
+				source: 'object actionMethod';
+				yourself).
+	miner recordIntermediateObjects: true.
 	miner install.
 	inst := OMBenchmark new.
 	res := self timeAndMemoryProfile: [ inst minerInstrumentedMethod ].
 	miner uninstall.
-	^res
+	^ res
 ]
 
 { #category : #benchmarks }
@@ -492,6 +511,33 @@ OMBenchmark >> benchReferenceWithReificationsInstrumentation [
 	|inst|
 	inst := OMBenchmark new.
 	 ^self bench: [inst referenceWithReificationsInstrumentation  ] 
+]
+
+{ #category : #'benchmark - memory' }
+OMBenchmark >> benchmarkFullInstrumentationMemory [
+	| no reference miner results |
+	Smalltalk garbageCollect.
+	no := self class new benchReferenceMemoryNoInstrumentation.
+	Smalltalk garbageCollect.
+	reference := self class new
+		benchReferenceMemoryFullInstrumentationNoStack.
+	Smalltalk garbageCollect.
+	miner := self class new benchMinersMemoryFullInstrumentationNoStack.
+	results := WriteStream on: String new.
+	results nextPutAll: 'no: ' , no printString , 'bytes'.
+	results cr.
+	results nextPutAll: 'reference: ' , reference printString , 'bytes'.
+	results cr.
+	results nextPutAll: 'miners: ' , miner printString , 'bytes'.
+	results cr.
+	results
+		nextPutAll: 'reference/no: x' , (reference / no) asFloat printString.
+	results cr.
+	results nextPutAll: 'miners/no: x' , (miner / no) asFloat printString.
+	results cr.
+	results
+		nextPutAll: 'miners/reference: x' , (miner / reference) asFloat printString.
+	^ results contents
 ]
 
 { #category : #'benchmark - memory' }
