@@ -312,11 +312,7 @@ OMBenchmark >> benchMinersSimpleWithContext [
 	| miner res |
 	self reinstallCollectorsContextBehavior.
 	miner := ObjectMiner new reachFromAST: self astForMiner.
-	miner
-		captureContext:
-			(self reificationsForMiner asOrderedCollection
-				add: #context;
-				yourself).
+	miner captureContext: #(context).
 	miner install.
 	res := self benchMiner.
 	miner uninstall.
