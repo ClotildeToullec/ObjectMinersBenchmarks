@@ -155,9 +155,10 @@ OMBenchmark >> benchAll [
 ]
 
 { #category : #'benchmarks - tools' }
-OMBenchmark >> benchMiner [
+OMBenchmark >> benchMiner: anObject [
 	|inst|
 	inst := OMBenchmark new.
+	inst bool: anObject.
 	^ self bench: [ inst minerInstrumentedMethod ]
 ]
 
@@ -184,7 +185,7 @@ OMBenchmark >> benchMinersAction [
 				source: 'object actionMethod.';
 				yourself).
 	miner install.
-	res := self benchMiner.
+	res := self benchMiner: false.
 	miner uninstall.
 	^ res
 ]
@@ -200,7 +201,7 @@ OMBenchmark >> benchMinersActionWithReifications [
 				source: 'object actionMethod.';
 				yourself).
 	miner install.
-	res := self benchMiner.
+	res := self benchMiner: false.
 	miner uninstall.
 	^ res
 ]
@@ -216,7 +217,7 @@ OMBenchmark >> benchMinersFalseCondition [
 				source: 'object bool';
 				yourself).
 	miner install.
-	res := self benchMiner.
+	res := self benchMiner: false.
 	miner uninstall.
 	^ res
 ]
@@ -232,7 +233,7 @@ OMBenchmark >> benchMinersFalseConditionWithReifications [
 				source: 'object bool';
 				yourself).
 	miner install.
-	res := self benchMiner.
+	res := self benchMiner: false.
 	miner uninstall.
 	^ res
 ]
@@ -254,7 +255,7 @@ OMBenchmark >> benchMinersFullNoStack [
 				yourself).
 	miner recordIntermediateObjects: true.
 	miner install.
-	res := self benchMiner.
+	res := self benchMiner: true.
 	miner uninstall.
 	^ res
 ]
@@ -266,7 +267,7 @@ OMBenchmark >> benchMinersIntermediateAndReifications [
 	miner recordIntermediateObjects: true.
 	miner captureContext: self reificationsForMiner.
 	miner install.
-	res := self benchMiner.
+	res := self benchMiner: false.
 	miner uninstall.
 	^ res
 ]
@@ -301,7 +302,7 @@ OMBenchmark >> benchMinersRecordIntermediate [
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner recordIntermediateObjects: true.
 	miner install.
-	res := self benchMiner.
+	res := self benchMiner: false.
 	miner uninstall.
 	^ res
 ]
@@ -312,7 +313,7 @@ OMBenchmark >> benchMinersReplay [
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner install.
 	self setReplayForMiner: miner.
-	res := self benchMiner.
+	res := self benchMiner: false.
 	miner uninstall.
 	^ res
 ]
@@ -322,7 +323,7 @@ OMBenchmark >> benchMinersSimple [
 	| miner res |
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner install.
-	res := self benchMiner.
+	res := self benchMiner: false.
 	miner uninstall.
 	^ res
 ]
@@ -334,7 +335,7 @@ OMBenchmark >> benchMinersSimpleWithContext [
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner captureContext: #(context).
 	miner install.
-	res := self benchMiner.
+	res := self benchMiner: false.
 	miner uninstall.
 	self uninstallCollectorsContextBehavior.
 	^ res
@@ -351,7 +352,7 @@ OMBenchmark >> benchMinersTrueCondition [
 				source: 'object bool';
 				yourself).
 	miner install.
-	res := self benchMiner.
+	res := self benchMiner: true.
 	miner uninstall.
 	^ res
 ]
@@ -367,7 +368,7 @@ OMBenchmark >> benchMinersTrueConditionWithReifications [
 				source: 'object bool';
 				yourself).
 	miner install.
-	res := self benchMiner.
+	res := self benchMiner: true.
 	miner uninstall.
 	^ res
 ]
@@ -378,7 +379,7 @@ OMBenchmark >> benchMinersWithReifications [
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner captureContext: self reificationsForMiner.
 	miner install.
-	res := self benchMiner.
+	res := self benchMiner: false.
 	miner uninstall.
 	^ res
 ]
