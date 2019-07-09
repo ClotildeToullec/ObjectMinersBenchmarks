@@ -15,9 +15,9 @@ BaselineOfObjectMinersBenchmarks >> baseline: spec [
 				with:
 					[ spec repository: 'github://StevenCostiou/Collectors:3-Optimizations' ].
 			spec
-				baseline: 'ObjectMiners'
-				with: [ spec repository: 'github://ClotildeToullec/ObjectMiners'.
-					spec package: 'ObjectMiners' ].
+				loads: #('ObjectMiners');
+				repository: 'github://ClotildeToullec/ObjectMiners'.
+				
 			spec repository: 'github://ClotildeToullec/ObjectMinersBenchmarks'.
 			spec package: 'ObjectMinersBenchmarks' ]
 ]
