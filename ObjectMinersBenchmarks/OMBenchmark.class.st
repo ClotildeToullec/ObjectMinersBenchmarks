@@ -169,6 +169,7 @@ OMBenchmark >> benchMinerMemorySimpleInstrumentation [
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner install.
 	inst := OMBenchmark new.
+	inst bool: true.
 	res := self timeAndMemoryProfile: [ inst minerInstrumentedMethod ].
 	miner uninstall.
 	^res
@@ -291,6 +292,7 @@ OMBenchmark >> benchMinersMemoryFullInstrumentationNoStack [
 	miner recordIntermediateObjects: true.
 	miner install.
 	inst := OMBenchmark new.
+	inst bool: true.
 	res := self timeAndMemoryProfile: [ inst minerInstrumentedMethod ].
 	miner uninstall.
 	^ res
