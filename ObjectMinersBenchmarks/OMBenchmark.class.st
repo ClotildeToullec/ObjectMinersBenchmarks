@@ -718,7 +718,7 @@ OMBenchmark >> computeSlowdownOf: result [
 
 { #category : #initialize }
 OMBenchmark >> initialize [
-	simpleItems := OrderedCollection new: 1000000
+	simpleItems := OrderedCollection new: 10000000
 ]
 
 { #category : #'reference methods' }
