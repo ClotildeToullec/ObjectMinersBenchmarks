@@ -19,6 +19,33 @@ OMBenchmark class >> bench [
 ]
 
 { #category : #benchmarking }
+OMBenchmark class >> benchReference [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x1;
+		benchReference
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> benchReferenceX10 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x10;
+		benchReference
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> benchReferenceX100 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x100;
+		benchReference
+]
+
+{ #category : #benchmarking }
 OMBenchmark class >> benchX10 [
 	<script>
 	Smalltalk garbageCollect.
@@ -282,6 +309,34 @@ OMBenchmark >> benchMinersWithReifications [
 	res := self benchMiner: false.
 	miner uninstall.
 	^ res
+]
+
+{ #category : #'benchmark - references' }
+OMBenchmark >> benchReference [
+	|inst spaceBefore spaceAfter res|
+	inst := OMBenchmark new.
+	Smalltalk garbageCollect.
+	spaceBefore := self spaceForInstances.
+	speedMode = #x1 ifTrue:[res := self benchReferenceX1: inst].
+	speedMode = #x10 ifTrue:[res := self benchReferenceX10: inst].
+	speedMode = #x100 ifTrue:[res := self benchReferenceX100: inst].
+	spaceAfter := self spaceForInstances.
+	self serializeBenchmark: {res. spaceBefore. spaceAfter} asOrderedCollection
+]
+
+{ #category : #'benchmark - references' }
+OMBenchmark >> benchReferenceX100: inst [
+	^ self bench: [ inst referenceNoInstrumentationX100 ]
+]
+
+{ #category : #'benchmark - references' }
+OMBenchmark >> benchReferenceX10: inst [
+	^ self bench: [ inst referenceNoInstrumentationX10 ]
+]
+
+{ #category : #'benchmark - references' }
+OMBenchmark >> benchReferenceX1: inst [
+	^ self bench: [ inst referenceNoInstrumentationX1 ]
 ]
 
 { #category : #'files - utilities' }
