@@ -784,7 +784,7 @@ OMBenchmark >> computeSlowdownOf: result [
 { #category : #initialize }
 OMBenchmark >> initialize [
 	simpleItems := OrderedCollection new: 10000000.
-	benchmarkDirectory := nil
+	self setMemoryEvaluationClasses
 ]
 
 { #category : #'reference methods' }
@@ -1051,6 +1051,22 @@ OMBenchmark >> serializeBenchmark: bc [
 	str close
 ]
 
+{ #category : #'benchmark - memory' }
+OMBenchmark >> setMemoryEvaluationClasses [
+	classesForMemoryEvaluation := (OrderedCollection new
+		addAll: (RPackage organizer packageOf: ObjectMiner) classes;
+		addAll: (RPackage organizer packageOf: Collector) classes;
+		addAll: (RPackage organizer packageOf: MetaLink) classes;
+		addAll:
+			{Array.
+			OrderedCollection.
+			SmallInteger.
+			Set.
+			ByteString.
+			Symbol};
+		asSet) asOrderedCollection reject: [ :c | c isMeta ]
+]
+
 { #category : #'benchmarks - tools' }
 OMBenchmark >> setReplayForMiner: miner [
 	|node rawData record|
@@ -1101,22 +1117,9 @@ OMBenchmark >> simpleItems: anObject [
 	simpleItems := anObject
 ]
 
-{ #category : #'benchmarks - tools' }
+{ #category : #'benchmark - memory' }
 OMBenchmark >> spaceForInstances [
-	^ (SpaceTally new
-		spaceTally:
-			((OrderedCollection new
-				addAll: (RPackage organizer packageOf: ObjectMiner) classes;
-				addAll: (RPackage organizer packageOf: Collector) classes;
-				addAll: (RPackage organizer packageOf: MetaLink) classes;
-				addAll:
-					{Array.
-					OrderedCollection.
-					SmallInteger.
-					Set.
-					ByteString.
-					Symbol};
-				asSet) asOrderedCollection reject: [ :c | c isMeta ]))
+	^ (SpaceTally new spaceTally: classesForMemoryEvaluation)
 		inject: 0
 		into: [ :t :s | t + s spaceForInstances ]
 ]
