@@ -3,7 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'bool',
-		'classesForMemoryEvaluation'
+		'classesForMemoryEvaluation',
+		'speedMode'
 	],
 	#category : #ObjectMinersBenchmarks
 }
@@ -12,7 +13,27 @@ Class {
 OMBenchmark class >> bench [
 	<script>
 	Smalltalk garbageCollect.
-	^ self new benchAll
+	^ self new
+		speedMode: #x1;
+		benchAll
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> benchX10 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x10;
+		benchAll
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> benchX100 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x100;
+		benchAll
 ]
 
 { #category : #'miners - setup' }
@@ -21,7 +42,8 @@ OMBenchmark >> actionMethod [
 
 { #category : #'miners - setup' }
 OMBenchmark >> astForMiner [
-	^ (OMBenchmark >> #minerInstrumentedMethod) ast statements last
+	^ (OMBenchmark >> self methodSelectorForSpeedMode) ast statements
+		last
 ]
 
 { #category : #'benchmarks - tools' }
@@ -63,7 +85,9 @@ OMBenchmark >> benchMiner: anObject [
 	|inst|
 	inst := OMBenchmark new.
 	inst bool: anObject.
-	^ self bench: [ inst minerInstrumentedMethod ]
+	speedMode = #x10 ifTrue:[^self bench: [ inst referenceNoInstrumentationX10 ]].
+	speedMode = #x100 ifTrue:[^self bench: [ inst referenceNoInstrumentationX100 ]].
+	^self bench: [ inst referenceNoInstrumentationX1 ]
 ]
 
 { #category : #benchmarks }
@@ -263,7 +287,7 @@ OMBenchmark >> benchMinersWithReifications [
 { #category : #'files - utilities' }
 OMBenchmark >> benchmarkDir [
 	| dir |
-	dir := 'ombc' asFileReference.
+	dir := ('ombc-' , speedMode) asFileReference.
 	dir ensureCreateDirectory.
 	^ dir
 ]
@@ -419,7 +443,8 @@ OMBenchmark >> computeSlowdownBetween: reference instrumented: instrumented mine
 
 { #category : #initialize }
 OMBenchmark >> initialize [
-	self setMemoryEvaluationClasses
+	self setMemoryEvaluationClasses.
+	speedMode := #x1
 ]
 
 { #category : #'files - utilities' }
@@ -427,9 +452,13 @@ OMBenchmark >> materializeBenchmark: bcFilename [
 	self flag: 'todo'
 ]
 
-{ #category : #'reference methods' }
-OMBenchmark >> minerInstrumentedMethod [
-	(10 squared + 1) asString
+{ #category : #'miners - setup' }
+OMBenchmark >> methodSelectorForSpeedMode [
+	speedMode = #x10
+		ifTrue: [ ^ #referenceNoInstrumentationX10 ].
+	speedMode = #x100
+		ifTrue: [ ^ #referenceNoInstrumentationX100 ].
+	^ #referenceNoInstrumentationX1
 ]
 
 { #category : #'files - utilities' }
@@ -548,6 +577,11 @@ OMBenchmark >> spaceForInstances [
 	^ (SpaceTally new spaceTally: classesForMemoryEvaluation)
 		inject: 0
 		into: [ :t :s | t + s spaceForInstances ]
+]
+
+{ #category : #accessing }
+OMBenchmark >> speedMode: anObject [
+	speedMode := anObject
 ]
 
 { #category : #'benchmarks - tools' }
