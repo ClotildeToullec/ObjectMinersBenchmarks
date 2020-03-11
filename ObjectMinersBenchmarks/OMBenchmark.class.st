@@ -3,7 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'simpleItems',
-		'bool'
+		'bool',
+		'benchmarkDirectory'
 	],
 	#category : #ObjectMinersBenchmarks
 }
@@ -13,6 +14,13 @@ OMBenchmark class >> bench [
 	<script>
 	Smalltalk garbageCollect.
 	^ self new benchAll
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> bench2 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new benchAll2
 ]
 
 { #category : #benchmarking }
@@ -151,6 +159,33 @@ OMBenchmark >> benchAll [
 			put: self benchReferenceTrueConditionWithReificationsInstrumentation;
 		at: 'Miner True Condition With Reifications'
 			put: self benchMinersTrueConditionWithReifications.
+	(self computeSlowdown: results) inspect
+]
+
+{ #category : #'benchmarks - tools' }
+OMBenchmark >> benchAll2 [
+	| results |
+	results := Dictionary new.
+	results
+		at: 'Simple Instrumentation' put: self benchMinersSimple;
+		at: 'Record Intermediate Objects'
+			put: self benchMinersRecordIntermediate;
+		at: 'Record Reifications' put: self benchMinersWithReifications;
+		at: 'Record Intermediate Objects + Reifications'
+			put: self benchMinersIntermediateAndReifications;
+		at: 'Action' put: self benchMinersAction;
+		at: 'Action + Reifications'
+			put: self benchMinersActionWithReifications;
+		at: 'False Condition' put: self benchMinersFalseCondition;
+		at: 'False Condition + Reifications'
+			put: self benchMinersFalseConditionWithReifications;
+		at: 'Full Instrumentation' put: self benchMinersFullNoStack;
+		at: 'Replay' put: self benchMinersReplay;
+		at: 'Record Context' put: self benchMinersSimpleWithContext;
+		at: 'True Condition' put: self benchMinersTrueCondition;
+		at: 'True Condition + Reifications'
+			put: self benchMinersTrueConditionWithReifications.
+	results inspect.
 	(self computeSlowdown: results) inspect
 ]
 
@@ -527,6 +562,14 @@ OMBenchmark >> benchResultsRef: refResult miner: minerResult [
 	(self computeSlowdownOf: result) inspect
 ]
 
+{ #category : #'files - utilities' }
+OMBenchmark >> benchmarkDir [
+	| dir |
+	dir := 'ombc' asFileReference.
+	dir ensureCreateDirectory.
+	^ dir
+]
+
 { #category : #'benchmark - memory' }
 OMBenchmark >> benchmarkFullInstrumentationMemory [
 	| no reference miner results |
@@ -552,6 +595,23 @@ OMBenchmark >> benchmarkFullInstrumentationMemory [
 	results
 		nextPutAll: 'miners/reference: x' , (miner / reference) asFloat printString.
 	^ results contents
+]
+
+{ #category : #benchmarks }
+OMBenchmark >> benchmarkReferenceMethods [
+	|delay x1 x10 x100 xavg|
+	delay := 2 seconds.
+	x1 := OrderedCollection new.
+	100 timesRepeat: [ x1 add: ([self referenceNoInstrumentationX1] benchFor: delay) iterations].
+"	x10 := OrderedCollection new.
+	100 timesRepeat: [ x10 add: ([self referenceNoInstrumentationX10] benchFor: delay) iterations].
+	x100 := OrderedCollection new.
+	100 timesRepeat: [ x100 add: ([self referenceNoInstrumentationX100] benchFor: delay) iterations]."
+	xavg := OrderedCollection new.
+	xavg add: {x1 average. x1 stdev. x1 }.
+"	xavg add: {x10 average. x10 stdev. x10 }.
+	xavg add: {x100 average. x100 stdev. x100 }."
+	^xavg
 ]
 
 { #category : #'benchmark - memory' }
@@ -721,12 +781,27 @@ OMBenchmark >> computeSlowdownOf: result [
 
 { #category : #initialize }
 OMBenchmark >> initialize [
-	simpleItems := OrderedCollection new: 10000000
+	simpleItems := OrderedCollection new: 10000000.
+	benchmarkDirectory := nil
 ]
 
 { #category : #'reference methods' }
 OMBenchmark >> minerInstrumentedMethod [
 	(10 squared + 1) asString
+]
+
+{ #category : #'files - utilities' }
+OMBenchmark >> newBenchmarkDir [
+	|dir|
+	dir := 'ombc' asFileReference.
+	dir ensureDeleteAll.
+	dir ensureCreateDirectory.
+	^ dir
+]
+
+{ #category : #'files - utilities' }
+OMBenchmark >> newBenchmarkResultFile [
+	^ self benchmarkDir / Time now asNanoSeconds printString
 ]
 
 { #category : #profiling }
@@ -854,7 +929,22 @@ OMBenchmark >> referenceFullInstrumentation [
 
 { #category : #'reference methods' }
 OMBenchmark >> referenceNoInstrumentation [
-	(10 squared + 1) asString
+	1 timesRepeat: [(10 squared + 1) asString]
+]
+
+{ #category : #'reference methods' }
+OMBenchmark >> referenceNoInstrumentationX1 [
+	(10 squared + 1) asString1
+]
+
+{ #category : #'reference methods' }
+OMBenchmark >> referenceNoInstrumentationX10 [
+	(10 squared + 1) asString10
+]
+
+{ #category : #'reference methods' }
+OMBenchmark >> referenceNoInstrumentationX100 [
+	(10 squared + 1) asString100
 ]
 
 { #category : #'reference methods' }
@@ -951,6 +1041,14 @@ OMBenchmark >> reinstallCollectorsContextBehavior [
 	'
 ]
 
+{ #category : #'files - utilities' }
+OMBenchmark >> serializeBenchmark: bc [
+	| str |
+	str := self newBenchmarkResultFile writeStream.
+	str nextPutAll: (STON toString: bc).
+	str close
+]
+
 { #category : #'benchmarks - tools' }
 OMBenchmark >> setReplayForMiner: miner [
 	|node rawData record|
@@ -1018,7 +1116,7 @@ OMBenchmark >> timeAndMemoryProfile: aBlock [
 
 { #category : #'benchmarks - tools' }
 OMBenchmark >> timeToBench [
-	^ 2 seconds
+	^ 1 seconds
 ]
 
 { #category : #'benchmarks - tools' }
