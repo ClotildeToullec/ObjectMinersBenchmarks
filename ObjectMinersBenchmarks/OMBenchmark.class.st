@@ -55,8 +55,7 @@ OMBenchmark >> benchAll [
 		at: 'True Condition' put: self benchMinersTrueCondition;
 		at: 'True Condition + Reifications'
 			put: self benchMinersTrueConditionWithReifications.
-	results inspect.
-	(self computeSlowdown: results) inspect
+	self serializeBenchmark: results
 ]
 
 { #category : #'benchmarks - tools' }
