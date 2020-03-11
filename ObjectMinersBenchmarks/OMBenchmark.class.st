@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'simpleItems',
 		'bool',
-		'benchmarkDirectory'
+		'benchmarkDirectory',
+		'classesForMemoryEvaluation'
 	],
 	#category : #ObjectMinersBenchmarks
 }
@@ -77,6 +78,7 @@ OMBenchmark >> astForMiner [
 
 { #category : #'benchmarks - tools' }
 OMBenchmark >> bench: aBlock [
+	|spaceBefore spaceAfter|
 	Smalltalk garbageCollect.
 	^ aBlock benchFor: self timeToBench
 ]
@@ -197,7 +199,7 @@ OMBenchmark >> benchMiner: anObject [
 	^ self bench: [ inst minerInstrumentedMethod ]
 ]
 
-{ #category : #'benchmark - memory' }
+{ #category : #'memory - old' }
 OMBenchmark >> benchMinerMemorySimpleInstrumentation [
 	| miner inst res|
 	Smalltalk garbageCollect.
@@ -308,7 +310,7 @@ OMBenchmark >> benchMinersIntermediateAndReifications [
 	^ res
 ]
 
-{ #category : #'benchmark - memory' }
+{ #category : #'memory - old' }
 OMBenchmark >> benchMinersMemoryFullInstrumentationNoStack [
 	| miner inst res |
 	Smalltalk garbageCollect.
@@ -459,7 +461,7 @@ OMBenchmark >> benchReferenceFullInstrumentationNoStack [
 	 ^self bench: [inst referenceFullInstrumentation  ] 
 ]
 
-{ #category : #'benchmark - memory' }
+{ #category : #'memory - old' }
 OMBenchmark >> benchReferenceMemoryFullInstrumentationNoStack [
 	| inst |
 	inst := OMBenchmark new.
@@ -467,7 +469,7 @@ OMBenchmark >> benchReferenceMemoryFullInstrumentationNoStack [
 	^self timeAndMemoryProfile: [ inst referenceFullInstrumentation ]
 ]
 
-{ #category : #'benchmark - memory' }
+{ #category : #'memory - old' }
 OMBenchmark >> benchReferenceMemoryNoInstrumentation [
 	| inst |
 	Smalltalk garbageCollect.
@@ -476,7 +478,7 @@ OMBenchmark >> benchReferenceMemoryNoInstrumentation [
 	
 ]
 
-{ #category : #'benchmark - memory' }
+{ #category : #'memory - old' }
 OMBenchmark >> benchReferenceMemorySimpleInstrumentation [
 	| inst |
 	Smalltalk garbageCollect.
@@ -570,7 +572,7 @@ OMBenchmark >> benchmarkDir [
 	^ dir
 ]
 
-{ #category : #'benchmark - memory' }
+{ #category : #'memory - old' }
 OMBenchmark >> benchmarkFullInstrumentationMemory [
 	| no reference miner results |
 	Smalltalk garbageCollect.
@@ -614,7 +616,7 @@ OMBenchmark >> benchmarkReferenceMethods [
 	^xavg
 ]
 
-{ #category : #'benchmark - memory' }
+{ #category : #'memory - old' }
 OMBenchmark >> benchmarkSimpleInstrumentationMemory [
 	| no reference miner results|
 	Smalltalk garbageCollect.
