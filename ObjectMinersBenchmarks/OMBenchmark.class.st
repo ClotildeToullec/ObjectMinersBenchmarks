@@ -586,7 +586,7 @@ OMBenchmark >> speedMode: anObject [
 
 { #category : #'benchmarks - tools' }
 OMBenchmark >> timeToBench [
-	^ 1 seconds
+	^ 10 seconds
 ]
 
 { #category : #'miners - setup' }
