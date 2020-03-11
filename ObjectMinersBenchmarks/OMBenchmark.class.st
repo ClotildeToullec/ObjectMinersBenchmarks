@@ -321,7 +321,8 @@ OMBenchmark >> benchReference [
 	speedMode = #x10 ifTrue:[res := self benchReferenceX10: inst].
 	speedMode = #x100 ifTrue:[res := self benchReferenceX100: inst].
 	spaceAfter := self spaceForInstances.
-	self serializeBenchmark: {res. spaceBefore. spaceAfter} asOrderedCollection
+	self serializeBenchmark: {res. spaceBefore. spaceAfter} asOrderedCollection.
+
 ]
 
 { #category : #'benchmark - references' }
