@@ -26,8 +26,10 @@ OMBenchmark >> astForMiner [
 
 { #category : #'benchmarks - tools' }
 OMBenchmark >> bench: aBlock [
+	| result |
 	Smalltalk garbageCollect.
-	^ aBlock benchFor: self timeToBench
+	result := aBlock benchFor: self timeToBench.
+	^ OrderedCollection with: result
 ]
 
 { #category : #'benchmarks - tools' }
@@ -131,7 +133,8 @@ OMBenchmark >> benchMinersFalseConditionWithReifications [
 
 { #category : #benchmarks }
 OMBenchmark >> benchMinersFullNoStack [
-	| miner res |
+	| miner spaceBefore spaceAfter res |
+	spaceBefore := self spaceForInstances.
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner captureContext: self reificationsForMiner.
 	miner
@@ -145,8 +148,11 @@ OMBenchmark >> benchMinersFullNoStack [
 				source: 'object actionMethod';
 				yourself).
 	miner recordIntermediateObjects: true.
-	miner install.
-	res := self benchMiner: true.
+	miner install.	
+	res := self benchMiner: true.		
+	spaceAfter := self spaceForInstances.
+	res add: spaceBefore.
+	res add: spaceAfter.
 	miner uninstall.
 	^ res
 ]
@@ -187,10 +193,14 @@ OMBenchmark >> benchMinersReplay [
 
 { #category : #benchmarks }
 OMBenchmark >> benchMinersSimple [
-	| miner res |
+	| miner spaceBefore spaceAfter res |
+	spaceBefore := self spaceForInstances.
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner install.
 	res := self benchMiner: false.
+	spaceAfter := self spaceForInstances.
+	res add: spaceBefore.
+	res add: spaceAfter.
 	miner uninstall.
 	^ res
 ]
