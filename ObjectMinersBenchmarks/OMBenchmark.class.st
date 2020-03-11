@@ -787,18 +787,14 @@ OMBenchmark >> initialize [
 	self setMemoryEvaluationClasses
 ]
 
+{ #category : #'files - utilities' }
+OMBenchmark >> materializeBenchmark: bcFilename [
+	self flag: 'todo'
+]
+
 { #category : #'reference methods' }
 OMBenchmark >> minerInstrumentedMethod [
 	(10 squared + 1) asString
-]
-
-{ #category : #'files - utilities' }
-OMBenchmark >> newBenchmarkDir [
-	|dir|
-	dir := 'ombc' asFileReference.
-	dir ensureDeleteAll.
-	dir ensureCreateDirectory.
-	^ dir
 ]
 
 { #category : #'files - utilities' }
