@@ -1106,12 +1106,14 @@ OMBenchmark >> spaceForInstances [
 			((OrderedCollection new
 				addAll: (RPackage organizer packageOf: ObjectMiner) classes;
 				addAll: (RPackage organizer packageOf: Collector) classes;
+				addAll: (RPackage organizer packageOf: MetaLink) classes;
 				addAll:
 					{Array.
 					OrderedCollection.
 					SmallInteger.
 					Set.
-					ByteString};
+					ByteString.
+					Symbol};
 				asSet) asOrderedCollection reject: [ :c | c isMeta ]))
 		inject: 0
 		into: [ :t :s | t + s spaceForInstances ]
