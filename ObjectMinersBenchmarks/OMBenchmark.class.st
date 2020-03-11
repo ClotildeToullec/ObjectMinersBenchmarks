@@ -1100,6 +1100,24 @@ OMBenchmark >> simpleItems: anObject [
 ]
 
 { #category : #'benchmarks - tools' }
+OMBenchmark >> spaceForInstances [
+	^ (SpaceTally new
+		spaceTally:
+			((OrderedCollection new
+				addAll: (RPackage organizer packageOf: ObjectMiner) classes;
+				addAll: (RPackage organizer packageOf: Collector) classes;
+				addAll:
+					{Array.
+					OrderedCollection.
+					SmallInteger.
+					Set.
+					ByteString};
+				asSet) asOrderedCollection reject: [ :c | c isMeta ]))
+		inject: 0
+		into: [ :t :s | t + s spaceForInstances ]
+]
+
+{ #category : #'benchmarks - tools' }
 OMBenchmark >> timeAndMemoryProfile: aBlock [
 	1000000 timesRepeat: aBlock.
 	^ (SpaceTally new
