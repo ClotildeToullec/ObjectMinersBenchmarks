@@ -77,6 +77,7 @@ OMBenchmark >> astForMiner [
 OMBenchmark >> bench: aBlock [
 	| result |
 	Smalltalk garbageCollect.
+	Smalltalk garbageCollect.
 	result := aBlock benchFor: self timeToBench.
 	^ OrderedCollection with: result
 ]
@@ -183,8 +184,9 @@ OMBenchmark >> benchMinersFalseConditionWithReifications [
 
 { #category : #benchmarks }
 OMBenchmark >> benchMinersFullNoStack [
-	| miner spaceBefore spaceAfter res |
+	| miner spaceBefore spaceAfter instancesBefore instancesAfter res |
 	spaceBefore := self spaceForInstances.
+	instancesBefore := self numberOfInstances.
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner captureContext: self reificationsForMiner.
 	miner
@@ -201,8 +203,11 @@ OMBenchmark >> benchMinersFullNoStack [
 	miner install.	
 	res := self benchMiner: true.		
 	spaceAfter := self spaceForInstances.
+	instancesAfter := self numberOfInstances.
 	res add: spaceBefore.
 	res add: spaceAfter.
+	res add: instancesBefore.
+	res add: instancesAfter.
 	miner uninstall.
 	^ res
 ]
@@ -243,14 +248,18 @@ OMBenchmark >> benchMinersReplay [
 
 { #category : #benchmarks }
 OMBenchmark >> benchMinersSimple [
-	| miner spaceBefore spaceAfter res |
+	| miner spaceBefore spaceAfter instancesBefore instancesAfter res |
 	spaceBefore := self spaceForInstances.
+	instancesBefore := self numberOfInstances.
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner install.
 	res := self benchMiner: false.
 	spaceAfter := self spaceForInstances.
+	instancesAfter := self numberOfInstances.
 	res add: spaceBefore.
 	res add: spaceAfter.
+	res add: instancesBefore.
+	res add: instancesAfter.
 	miner uninstall.
 	^ res
 ]
@@ -313,15 +322,17 @@ OMBenchmark >> benchMinersWithReifications [
 
 { #category : #'benchmark - references' }
 OMBenchmark >> benchReference [
-	|inst spaceBefore spaceAfter res|
+	|inst spaceBefore instancesBefore instancesAfter spaceAfter res|
 	inst := OMBenchmark new.
 	Smalltalk garbageCollect.
 	spaceBefore := self spaceForInstances.
+	instancesBefore := self numberOfInstances.
 	speedMode = #x1 ifTrue:[res := self benchReferenceX1: inst].
 	speedMode = #x10 ifTrue:[res := self benchReferenceX10: inst].
 	speedMode = #x100 ifTrue:[res := self benchReferenceX100: inst].
 	spaceAfter := self spaceForInstances.
-	self serializeBenchmark: {res. spaceBefore. spaceAfter} asOrderedCollection.
+	instancesAfter := self numberOfInstances.
+	self serializeBenchmark: {res. spaceBefore. spaceAfter. instancesBefore. instancesAfter} asOrderedCollection.
 
 ]
 
@@ -520,6 +531,13 @@ OMBenchmark >> methodSelectorForSpeedMode [
 { #category : #'files - utilities' }
 OMBenchmark >> newBenchmarkResultFile [
 	^ self benchmarkDir / Time now asNanoSeconds printString
+]
+
+{ #category : #'benchmark - memory' }
+OMBenchmark >> numberOfInstances [
+	^ classesForMemoryEvaluation
+		inject: 0
+		into: [ :t :c | t + c allInstances size ]
 ]
 
 { #category : #'reference methods' }
