@@ -77,6 +77,7 @@ OMBenchmark >> astForMiner [
 OMBenchmark >> bench: aBlock [
 	| result |
 	Smalltalk garbageCollect.
+	Smalltalk garbageCollect.
 	result := aBlock benchFor: self timeToBench.
 	^ OrderedCollection with: result
 ]
