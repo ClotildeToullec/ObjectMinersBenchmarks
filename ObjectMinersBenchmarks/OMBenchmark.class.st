@@ -20,12 +20,30 @@ OMBenchmark class >> bench [
 ]
 
 { #category : #benchmarking }
+OMBenchmark class >> bench2 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x1;
+		benchAll
+]
+
+{ #category : #benchmarking }
 OMBenchmark class >> benchReference [
 	<script>
 	Smalltalk garbageCollect.
 	^ self new
 		speedMode: #x1;
 		benchReference
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> benchReference2 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x1;
+		benchReference2
 ]
 
 { #category : #benchmarking }
