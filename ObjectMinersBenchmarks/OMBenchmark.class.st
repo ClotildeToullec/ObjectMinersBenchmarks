@@ -109,6 +109,15 @@ OMBenchmark >> benchAll [
 	self serializeBenchmark: results
 ]
 
+{ #category : #'becnhmarks-experimental' }
+OMBenchmark >> benchMiner2: anObject [
+	|inst|
+	inst := OMBenchmark new.
+	inst bool: anObject.
+	
+	^[1000 timesRepeat:  [ inst referenceNoInstrumentationX100 ]] timeToRun asNanoSeconds 
+]
+
 { #category : #'benchmarks - tools' }
 OMBenchmark >> benchMiner: anObject [
 	|inst|
@@ -209,6 +218,32 @@ OMBenchmark >> benchMinersFullNoStack [
 	res add: spaceAfter.
 	res add: instancesBefore.
 	res add: instancesAfter.
+	miner uninstall.
+	^ res
+]
+
+{ #category : #'becnhmarks-experimental' }
+OMBenchmark >> benchMinersFullNoStack2 [
+	| miner spaceBefore spaceAfter instancesBefore instancesAfter res |
+	spaceBefore := self spaceForInstances.
+	instancesBefore := self numberOfInstances.
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner captureContext: self reificationsForMiner.
+	miner
+		setCondition:
+			(CollectEvaluation new
+				source: 'object bool';
+				yourself).
+	miner
+		setAction:
+			(CollectEvaluation new
+				source: 'object actionMethod';
+				yourself).
+	miner recordIntermediateObjects: true.
+	miner install.	
+	res := self benchMiner2: true.		
+	spaceAfter := self spaceForInstances.
+	instancesAfter := self numberOfInstances.
 	miner uninstall.
 	^ res
 ]
@@ -337,6 +372,21 @@ OMBenchmark >> benchReference [
 
 ]
 
+{ #category : #'becnhmarks-experimental' }
+OMBenchmark >> benchReference2X100: inst [
+	^ [ 1000 timesRepeat: [inst referenceNoInstrumentationX100 ]] timeToRun asNanoSeconds
+]
+
+{ #category : #'becnhmarks-experimental' }
+OMBenchmark >> benchReference2X10: inst [
+	^ [ 10000 timesRepeat: [inst referenceNoInstrumentationX10 ]] timeToRun asNanoSeconds
+]
+
+{ #category : #'becnhmarks-experimental' }
+OMBenchmark >> benchReference2X1: inst [
+	^ [ 10000 timesRepeat: [inst referenceNoInstrumentationX1 ]] timeToRun asNanoSeconds
+]
+
 { #category : #'benchmark - references' }
 OMBenchmark >> benchReferenceX100: inst [
 	^ self bench: [ inst referenceNoInstrumentationX100 ]
@@ -385,6 +435,18 @@ OMBenchmark >> bool [
 { #category : #accessing }
 OMBenchmark >> bool: anObject [
 	bool := anObject
+]
+
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> buildResultsAnalyze [
+	|analyzer rezs|
+	analyzer := OMBenchmarkResultsAnalyzer new.
+	rezs := OrderedCollection new.
+	rezs add: (analyzer compare: (results at: #x1) withReference: (results at: #x1ref)).
+	rezs add: (analyzer compare: (results at: #x10) withReference: (results at: #x10ref)).
+	rezs add: (analyzer compare: (results at: #x100) withReference: (results at: #x100ref)).
+	(rezs collect: [:r|r mean] )inspect
+	
 ]
 
 { #category : #deprecated }
@@ -565,6 +627,20 @@ OMBenchmark >> numberOfInstances [
 	^ classesForMemoryEvaluation
 		inject: 0
 		into: [ :t :c | t + c allInstances size ]
+]
+
+{ #category : #'becnhmarks-experimental' }
+OMBenchmark >> rebenchX1V2 [
+	|resRef resMiners|
+	speedMode := #x100.
+	resRef := OrderedCollection new.
+	resMiners := OrderedCollection new.
+	
+	30 timesRepeat: [ resRef add: (self benchReference2X10: self class new) ].
+	30 timesRepeat: [ resMiners add: (self benchMinersFullNoStack2) ].
+	
+	self assert: ((resRef stdev) squared) / ((resMiners stdev) squared) <= 2.
+	self assert: ((resRef stdev) squared) / ((resMiners stdev) squared) >= 0.5.
 ]
 
 { #category : #'reference methods' }
