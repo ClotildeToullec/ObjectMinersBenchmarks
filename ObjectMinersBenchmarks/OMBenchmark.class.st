@@ -149,7 +149,7 @@ OMBenchmark >> benchMiner: anObject [
 	res := OrderedCollection new.
 	speedMode = #x10 ifTrue:[self bench: [ inst referenceNoInstrumentationX10 ] in: res].
 	speedMode = #x100 ifTrue:[self bench: [ inst referenceNoInstrumentationX100 ] in: res].
-	self bench: [ inst referenceNoInstrumentationX1 ] in: res.
+	speedMode = #x1 ifTrue:[ self bench: [ inst referenceNoInstrumentationX1 ] in: res].
 	^res
 ]
 
