@@ -85,26 +85,25 @@ OMBenchmark >> bench: aBlock [
 
 { #category : #'benchmarks - tools' }
 OMBenchmark >> benchAll [
-	| results |
 	results := Dictionary new.
 	results
-		at: 'Simple Instrumentation' put: self benchMinersSimple;
-		at: 'Record Intermediate Objects'
+		at: '(a) Simple Instrumentation' put: self benchMinersSimple;
+		at: '(d) Record Intermediate Objects'
 			put: self benchMinersRecordIntermediate;
-		at: 'Record Reifications' put: self benchMinersWithReifications;
-		at: 'Record Intermediate Objects + Reifications'
+		at: '(b) Record Reifications' put: self benchMinersWithReifications;
+		at: '(e) = (d)+ Reifications'
 			put: self benchMinersIntermediateAndReifications;
-		at: 'Action' put: self benchMinersAction;
-		at: 'Action + Reifications'
+		at: '(f) Action' put: self benchMinersAction;
+		at: '(g) = (f) + Reifications'
 			put: self benchMinersActionWithReifications;
-		at: 'False Condition' put: self benchMinersFalseCondition;
-		at: 'False Condition + Reifications'
+		at: '(h) False Condition' put: self benchMinersFalseCondition;
+		at: '(i) = (h) + Reifications'
 			put: self benchMinersFalseConditionWithReifications;
-		at: 'Full Instrumentation' put: self benchMinersFullNoStack;
-		at: 'Replay' put: self benchMinersReplay;
-		at: 'Record Context' put: self benchMinersSimpleWithContext;
-		at: 'True Condition' put: self benchMinersTrueCondition;
-		at: 'True Condition + Reifications'
+		at: '(l) Full Instrumentation' put: self benchMinersFullNoStack;
+		at: '(m) Replay' put: self benchMinersReplay;
+		at: '(c) Record Context' put: self benchMinersSimpleWithContext;
+		at: '(j) True Condition' put: self benchMinersTrueCondition;
+		at: '(k) = (j) + Reifications'
 			put: self benchMinersTrueConditionWithReifications.
 	self serializeBenchmark: results
 ]
