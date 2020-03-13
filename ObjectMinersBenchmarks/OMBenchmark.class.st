@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'bool',
 		'classesForMemoryEvaluation',
-		'speedMode'
+		'speedMode',
+		'results'
 	],
 	#category : #ObjectMinersBenchmarks
 }
@@ -19,12 +20,66 @@ OMBenchmark class >> bench [
 ]
 
 { #category : #benchmarking }
+OMBenchmark class >> bench2 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x1;
+		benchAll
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> bench2X10 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x10;
+		benchAll
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> bench2X100 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x100;
+		benchAll
+]
+
+{ #category : #benchmarking }
 OMBenchmark class >> benchReference [
 	<script>
 	Smalltalk garbageCollect.
 	^ self new
 		speedMode: #x1;
 		benchReference
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> benchReference2 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x1;
+		benchReference2
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> benchReference2X10 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x10;
+		benchReference2
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> benchReference2X100 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x100;
+		benchReference2
 ]
 
 { #category : #benchmarking }
@@ -82,34 +137,61 @@ OMBenchmark >> bench: aBlock [
 	^ OrderedCollection with: result
 ]
 
-{ #category : #'benchmarks - tools' }
-OMBenchmark >> benchAll [
-	| results |
-	results := Dictionary new.
-	results
-		at: 'Simple Instrumentation' put: self benchMinersSimple;
-		at: 'Record Intermediate Objects'
-			put: self benchMinersRecordIntermediate;
-		at: 'Record Reifications' put: self benchMinersWithReifications;
-		at: 'Record Intermediate Objects + Reifications'
-			put: self benchMinersIntermediateAndReifications;
-		at: 'Action' put: self benchMinersAction;
-		at: 'Action + Reifications'
-			put: self benchMinersActionWithReifications;
-		at: 'False Condition' put: self benchMinersFalseCondition;
-		at: 'False Condition + Reifications'
-			put: self benchMinersFalseConditionWithReifications;
-		at: 'Full Instrumentation' put: self benchMinersFullNoStack;
-		at: 'Replay' put: self benchMinersReplay;
-		at: 'Record Context' put: self benchMinersSimpleWithContext;
-		at: 'True Condition' put: self benchMinersTrueCondition;
-		at: 'True Condition + Reifications'
-			put: self benchMinersTrueConditionWithReifications.
-	self serializeBenchmark: results
+{ #category : #'benchmarks - 2' }
+OMBenchmark >> bench: aBlock in: collection [
+	30 timesRepeat: [ collection add: aBlock timeToRun asMilliSeconds ]
 ]
 
 { #category : #'benchmarks - tools' }
+OMBenchmark >> benchAll [
+	results := Dictionary new.
+	results
+		at: '(a) Simple Instrumentation' put: self benchMinersSimple;
+		at: '(d) Record Intermediate Objects'
+			put: self benchMinersRecordIntermediate;
+		at: '(b) Record Reifications' put: self benchMinersWithReifications;
+		at: '(e) = (d)+ Reifications'
+			put: self benchMinersIntermediateAndReifications;
+		at: '(f) Action' put: self benchMinersAction;
+		at: '(g) = (f) + Reifications'
+			put: self benchMinersActionWithReifications;
+		at: '(h) False Condition' put: self benchMinersFalseCondition;
+		at: '(i) = (h) + Reifications'
+			put: self benchMinersFalseConditionWithReifications;
+		at: '(l) Full Instrumentation' put: self benchMinersFullNoStack;
+		at: '(m) Replay' put: self benchMinersReplay;
+		at: '(c) Record Context' put: self benchMinersSimpleWithContext;
+		at: '(j) True Condition' put: self benchMinersTrueCondition;
+		at: '(k) = (j) + Reifications'
+			put: self benchMinersTrueConditionWithReifications.
+	"self serializeBenchmark: results"
+	('results-miners-', speedMode asString) asFileReference writeStream nextPutAll: (STON toString: results); close
+
+]
+
+{ #category : #'becnhmarks-experimental' }
+OMBenchmark >> benchMiner2: anObject [
+	|inst|
+	inst := OMBenchmark new.
+	inst bool: anObject.
+	
+	^[1000 timesRepeat:  [ inst referenceNoInstrumentationX100 ]] timeToRun asNanoSeconds 
+]
+
+{ #category : #'benchmarks - 2' }
 OMBenchmark >> benchMiner: anObject [
+	|inst res|
+	inst := OMBenchmark new.
+	inst bool: anObject.
+	res := OrderedCollection new.
+	speedMode = #x10 ifTrue:[self bench: [ inst referenceNoInstrumentationX10 ] in: res].
+	speedMode = #x100 ifTrue:[self bench: [ inst referenceNoInstrumentationX100 ] in: res].
+	speedMode = #x1 ifTrue:[ self bench: [ inst referenceNoInstrumentationX1 ] in: res].
+	^res
+]
+
+{ #category : #'benchmarks - tools' }
+OMBenchmark >> benchMinerOld: anObject [
 	|inst|
 	inst := OMBenchmark new.
 	inst bool: anObject.
@@ -185,6 +267,36 @@ OMBenchmark >> benchMinersFalseConditionWithReifications [
 { #category : #benchmarks }
 OMBenchmark >> benchMinersFullNoStack [
 	| miner spaceBefore spaceAfter instancesBefore instancesAfter res |
+	"spaceBefore := self spaceForInstances.
+	instancesBefore := self numberOfInstances."
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner captureContext: self reificationsForMiner.
+	miner
+		setCondition:
+			(CollectEvaluation new
+				source: 'object bool';
+				yourself).
+	miner
+		setAction:
+			(CollectEvaluation new
+				source: 'object actionMethod';
+				yourself).
+	miner recordIntermediateObjects: true.
+	miner install.	
+	res := self benchMiner: true.		
+	"spaceAfter := self spaceForInstances.
+	instancesAfter := self numberOfInstances.
+	res add: spaceBefore.
+	res add: spaceAfter.
+	res add: instancesBefore.
+	res add: instancesAfter."
+	miner uninstall.
+	^ res
+]
+
+{ #category : #'becnhmarks-experimental' }
+OMBenchmark >> benchMinersFullNoStack2 [
+	| miner spaceBefore spaceAfter instancesBefore instancesAfter res |
 	spaceBefore := self spaceForInstances.
 	instancesBefore := self numberOfInstances.
 	miner := ObjectMiner new reachFromAST: self astForMiner.
@@ -201,13 +313,9 @@ OMBenchmark >> benchMinersFullNoStack [
 				yourself).
 	miner recordIntermediateObjects: true.
 	miner install.	
-	res := self benchMiner: true.		
+	res := self benchMiner2: true.		
 	spaceAfter := self spaceForInstances.
 	instancesAfter := self numberOfInstances.
-	res add: spaceBefore.
-	res add: spaceAfter.
-	res add: instancesBefore.
-	res add: instancesAfter.
 	miner uninstall.
 	^ res
 ]
@@ -249,17 +357,17 @@ OMBenchmark >> benchMinersReplay [
 { #category : #benchmarks }
 OMBenchmark >> benchMinersSimple [
 	| miner spaceBefore spaceAfter instancesBefore instancesAfter res |
-	spaceBefore := self spaceForInstances.
-	instancesBefore := self numberOfInstances.
+	"spaceBefore := self spaceForInstances.
+	instancesBefore := self numberOfInstances."
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner install.
 	res := self benchMiner: false.
 	spaceAfter := self spaceForInstances.
 	instancesAfter := self numberOfInstances.
-	res add: spaceBefore.
+"	res add: spaceBefore.
 	res add: spaceAfter.
 	res add: instancesBefore.
-	res add: instancesAfter.
+	res add: instancesAfter."
 	miner uninstall.
 	^ res
 ]
@@ -336,6 +444,49 @@ OMBenchmark >> benchReference [
 
 ]
 
+{ #category : #'benchmark - references 2' }
+OMBenchmark >> benchReference2 [
+	|inst res|
+	inst := OMBenchmark new.
+	Smalltalk garbageCollect.	
+	speedMode = #x1 ifTrue:[res := self benchReference2X1: inst].
+	speedMode = #x10 ifTrue:[res := self benchReference2X10: inst].
+	speedMode = #x100 ifTrue:[res := self benchReference2X100: inst].	
+	"self serializeBenchmark: res"
+	('results-reference-', speedMode asString) asFileReference writeStream nextPutAll: (STON toString: res); close
+
+]
+
+{ #category : #'benchmark - references 2' }
+OMBenchmark >> benchReference2X100: inst [
+	| col |
+	col := OrderedCollection new.
+	30
+		timesRepeat: [ col
+				add: [ inst referenceNoInstrumentationX100 ] timeToRun asMilliSeconds ].
+	^ col
+]
+
+{ #category : #'benchmark - references 2' }
+OMBenchmark >> benchReference2X10: inst [
+	| col |
+	col := OrderedCollection new.
+	30
+		timesRepeat: [ col
+				add: [ inst referenceNoInstrumentationX10 ] timeToRun asMilliSeconds ].
+	^ col
+]
+
+{ #category : #'benchmark - references 2' }
+OMBenchmark >> benchReference2X1: inst [
+	| col |
+	col := OrderedCollection new.
+	30
+		timesRepeat: [ col
+				add: [ inst referenceNoInstrumentationX1 ] timeToRun asMilliSeconds ].
+	^ col
+]
+
 { #category : #'benchmark - references' }
 OMBenchmark >> benchReferenceX100: inst [
 	^ self bench: [ inst referenceNoInstrumentationX100 ]
@@ -384,6 +535,18 @@ OMBenchmark >> bool [
 { #category : #accessing }
 OMBenchmark >> bool: anObject [
 	bool := anObject
+]
+
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> buildResultsAnalyze [
+	|analyzer rezs|
+	analyzer := OMBenchmarkResultsAnalyzer new.
+	rezs := OrderedCollection new.
+	rezs add: (analyzer compare: (results at: #x1) withReference: (results at: #x1ref)).
+	rezs add: (analyzer compare: (results at: #x10) withReference: (results at: #x10ref)).
+	rezs add: (analyzer compare: (results at: #x100) withReference: (results at: #x100ref)).
+	(rezs collect: [:r|r mean] )inspect
+	
 ]
 
 { #category : #deprecated }
@@ -515,8 +678,34 @@ OMBenchmark >> initialize [
 ]
 
 { #category : #'files - utilities' }
-OMBenchmark >> materializeBenchmark: bcFilename [
-	self flag: 'todo'
+OMBenchmark >> materializeBenchmark: bcFileReference [
+	^STON fromString: bcFileReference contents
+]
+
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> materializeResults [
+	results := Dictionary new.
+	results at: #x1 put: (self materializeResults: 'x1').
+	results at: #x10 put: (self materializeResults: 'x10').
+	results at: #x100 put: (self materializeResults: 'x100').
+	results at: #x1ref put: (self materializeResults: 'x1ref').
+	results at: #x10ref put: (self materializeResults: 'x10ref').
+	results at: #x100ref put: (self materializeResults: 'x100ref').
+	
+]
+
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> materializeResults: dirName [
+	| result bcResults directory |
+	result := OMBenchmarkResult new.
+	bcResults := OrderedCollection new.
+	directory := 'results' asFileReference / ('ombc-' , dirName).
+	directory allFiles
+		do:
+			[ :fileReference | bcResults add: (self materializeBenchmark: fileReference) ].
+	result sample: bcResults.
+	result computeResults.
+	^ result
 ]
 
 { #category : #'miners - setup' }
@@ -540,6 +729,74 @@ OMBenchmark >> numberOfInstances [
 		into: [ :t :c | t + c allInstances size ]
 ]
 
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> printLineIn: str forScenario: scenario [		
+	str << scenario.
+	str << '&'.
+	str << (self printMean: #x1 forScenario: scenario).
+	str << '$\pm$'.
+	str << (self printMargin: #x1 forScenario: scenario).
+	str << '&'.
+	str << (self printMean: #x10 forScenario: scenario).
+	str << '$\pm$'.	
+	str << (self printMargin: #x10 forScenario: scenario).
+	str << '&'.
+	str << (self printMean: #x100 forScenario: scenario).
+	str << '$\pm$'.
+	str << (self printMargin: #x100 forScenario: scenario).
+	str << '\\'.
+	str cr.
+]
+
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> printMargin: xref forScenario: scenario [
+	^ (((((results at: xref) margin at: scenario)) rounded)) printString
+]
+
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> printMean: xref forScenario: scenario [
+	^ ((results at: xref) mean at: scenario) rounded printString
+]
+
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> printRefMargin: xref [
+	^ (((results at: xref) margin rounded)) printString
+]
+
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> printRefMean: xref [
+	^ (results at: xref) mean rounded printString
+]
+
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> printResults [
+
+	|str|
+	str := WriteStream on: String new.
+	str << ('References (no instrumentation)&', (self printRefMean: #x1ref), '$\pm$', (self printRefMargin:#x1ref)).
+	str << ('&', (self printRefMean: #x10ref), '$\pm$', (self printRefMargin:#x10ref)).
+	str << ('&', (self printRefMean: #x100ref), '$\pm$', (self printRefMargin:#x100ref)).
+	str <<  '\\'.
+	str cr.
+	(results at: #x1) mean keysDo:[:scenario|	
+		self printLineIn: str forScenario: scenario	].
+	^str contents
+]
+
+{ #category : #'becnhmarks-experimental' }
+OMBenchmark >> rebenchX1V2 [
+	|resRef resMiners|
+	speedMode := #x100.
+	resRef := OrderedCollection new.
+	resMiners := OrderedCollection new.
+	
+	30 timesRepeat: [ resRef add: (self benchReference2X10: self class new) ].
+	30 timesRepeat: [ resMiners add: (self benchMinersFullNoStack2) ].
+	
+	self assert: ((resRef stdev) squared) / ((resMiners stdev) squared) <= 2.
+	self assert: ((resRef stdev) squared) / ((resMiners stdev) squared) >= 0.5.
+]
+
 { #category : #'reference methods' }
 OMBenchmark >> referenceNoInstrumentationX1 [
 	(10 squared + 1) asString1
@@ -553,6 +810,11 @@ OMBenchmark >> referenceNoInstrumentationX10 [
 { #category : #'reference methods' }
 OMBenchmark >> referenceNoInstrumentationX100 [
 	(10 squared + 1) asString100
+]
+
+{ #category : #'reference methods' }
+OMBenchmark >> referenceNoInstrumentationX1000 [
+	(10 squared + 1) asString1000
 ]
 
 { #category : #'miners - setup' }
