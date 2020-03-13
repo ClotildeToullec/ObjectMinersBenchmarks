@@ -77,9 +77,21 @@ OMBenchmarkResult >> computeReferenceMemoryOverhead [
 ]
 
 { #category : #computing }
+OMBenchmarkResult >> computeReferenceMemoryOverheadMean [
+	^ (sample collect: [ :col | col third / col second ]) average rounded
+]
+
+{ #category : #computing }
+OMBenchmarkResult >> computeReferenceMemoryOverheadStdev [
+	^ (sample collect: [ :col | col third / col second ]) stdev rounded
+]
+
+{ #category : #computing }
 OMBenchmarkResult >> computeReferenceResults [
 	mean := self computeReferenceFrequencyMeans.
-	stdev := self computeReferenceStdev 
+	stdev := self computeReferenceStdev. 
+	memoryOverheadMean := self computeReferenceMemoryOverheadMean.
+	memoryOverheadStdev := self computeReferenceMemoryOverheadStdev.
 ]
 
 { #category : #computing }
