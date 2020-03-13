@@ -711,6 +711,11 @@ OMBenchmark >> referenceNoInstrumentationX100 [
 	(10 squared + 1) asString100
 ]
 
+{ #category : #'reference methods' }
+OMBenchmark >> referenceNoInstrumentationX1000 [
+	(10 squared + 1) asString1000
+]
+
 { #category : #'miners - setup' }
 OMBenchmark >> reificationsForMiner [
 	^ #(#object #class #receiver #selector)
