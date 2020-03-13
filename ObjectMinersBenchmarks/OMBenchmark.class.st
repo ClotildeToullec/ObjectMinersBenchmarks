@@ -103,7 +103,7 @@ OMBenchmark >> bench: aBlock [
 
 { #category : #'benchmarks - 2' }
 OMBenchmark >> bench: aBlock in: collection [
-	30 timesRepeat: [ collection add: aBlock timeToRun ]
+	30 timesRepeat: [ collection add: aBlock timeToRun asMilliSeconds ]
 ]
 
 { #category : #'benchmarks - tools' }
