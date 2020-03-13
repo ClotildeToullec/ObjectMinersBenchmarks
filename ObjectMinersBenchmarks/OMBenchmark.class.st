@@ -83,6 +83,11 @@ OMBenchmark >> bench: aBlock [
 	^ OrderedCollection with: result
 ]
 
+{ #category : #'benchmarks - 2' }
+OMBenchmark >> bench: aBlock in: collection [
+	30 timesRepeat: [ collection add: aBlock timeToRun ]
+]
+
 { #category : #'benchmarks - tools' }
 OMBenchmark >> benchAll [
 	results := Dictionary new.
@@ -117,8 +122,20 @@ OMBenchmark >> benchMiner2: anObject [
 	^[1000 timesRepeat:  [ inst referenceNoInstrumentationX100 ]] timeToRun asNanoSeconds 
 ]
 
-{ #category : #'benchmarks - tools' }
+{ #category : #'benchmarks - 2' }
 OMBenchmark >> benchMiner: anObject [
+	|inst res|
+	inst := OMBenchmark new.
+	inst bool: anObject.
+	res := OrderedCollection new.
+	speedMode = #x10 ifTrue:[self bench: [ inst referenceNoInstrumentationX10 ] in: res].
+	speedMode = #x100 ifTrue:[self bench: [ inst referenceNoInstrumentationX100 ] in: res].
+	self bench: [ inst referenceNoInstrumentationX1 ] in: res.
+	^res
+]
+
+{ #category : #'benchmarks - tools' }
+OMBenchmark >> benchMinerOld: anObject [
 	|inst|
 	inst := OMBenchmark new.
 	inst bool: anObject.
