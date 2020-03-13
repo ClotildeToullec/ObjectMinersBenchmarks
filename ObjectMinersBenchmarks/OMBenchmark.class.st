@@ -371,19 +371,46 @@ OMBenchmark >> benchReference [
 
 ]
 
-{ #category : #'becnhmarks-experimental' }
+{ #category : #'benchmark - references 2' }
+OMBenchmark >> benchReference2 [
+	|inst res|
+	inst := OMBenchmark new.
+	Smalltalk garbageCollect.	
+	speedMode = #x1 ifTrue:[res := self benchReference2X1: inst].
+	speedMode = #x10 ifTrue:[res := self benchReference2X10: inst].
+	speedMode = #x100 ifTrue:[res := self benchReference2X100: inst].	
+	self serializeBenchmark: res
+
+]
+
+{ #category : #'benchmark - references 2' }
 OMBenchmark >> benchReference2X100: inst [
-	^ [ 1000 timesRepeat: [inst referenceNoInstrumentationX100 ]] timeToRun asNanoSeconds
+	| col |
+	col := OrderedCollection new.
+	30
+		timesRepeat: [ col
+				add: [ inst referenceNoInstrumentationX100 ] timeToRun asMilliSeconds ].
+	^ col
 ]
 
-{ #category : #'becnhmarks-experimental' }
+{ #category : #'benchmark - references 2' }
 OMBenchmark >> benchReference2X10: inst [
-	^ [ 10000 timesRepeat: [inst referenceNoInstrumentationX10 ]] timeToRun asNanoSeconds
+	| col |
+	col := OrderedCollection new.
+	30
+		timesRepeat: [ col
+				add: [ inst referenceNoInstrumentationX10 ] timeToRun asMilliSeconds ].
+	^ col
 ]
 
-{ #category : #'becnhmarks-experimental' }
+{ #category : #'benchmark - references 2' }
 OMBenchmark >> benchReference2X1: inst [
-	^ [ 10000 timesRepeat: [inst referenceNoInstrumentationX1 ]] timeToRun asNanoSeconds
+	| col |
+	col := OrderedCollection new.
+	30
+		timesRepeat: [ col
+				add: [ inst referenceNoInstrumentationX1 ] timeToRun asMilliSeconds ].
+	^ col
 ]
 
 { #category : #'benchmark - references' }
