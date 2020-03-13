@@ -630,9 +630,9 @@ OMBenchmark >> numberOfInstances [
 ]
 
 { #category : #'benchmarks - analyze' }
-OMBenchmark >> printLineIn: str forScenario: scenario [	
-	str << '&'.
+OMBenchmark >> printLineIn: str forScenario: scenario [		
 	str << scenario.
+	str << '&'.
 	str << (self printMean: #x1 forScenario: scenario).
 	str << '$\pm$'.
 	str << (self printMargin: #x1 forScenario: scenario).
@@ -644,27 +644,28 @@ OMBenchmark >> printLineIn: str forScenario: scenario [
 	str << (self printMean: #x100 forScenario: scenario).
 	str << '$\pm$'.
 	str << (self printMargin: #x100 forScenario: scenario).
-	str << '\\'
+	str << '\\'.
+	str cr.
 ]
 
 { #category : #'benchmarks - analyze' }
 OMBenchmark >> printMargin: xref forScenario: scenario [
-	^ (((results at: xref) margin at: scenario)  roundUpTo: 0.01) printString
+	^ (((((results at: xref) margin at: scenario) +0.001) roundUpTo: 0.01) truncateTo: 0.01) printString
 ]
 
 { #category : #'benchmarks - analyze' }
 OMBenchmark >> printMean: xref forScenario: scenario [
-	^ ((results at: xref) mean at: scenario) printString
+	^ ((results at: xref) mean at: scenario) rounded printString
 ]
 
 { #category : #'benchmarks - analyze' }
 OMBenchmark >> printRefMargin: xref [
-	^ ((results at: xref) margin roundUpTo: 0.01) printString
+	^ (((results at: xref) margin roundUpTo: 0.01) truncateTo: 0.01) printString
 ]
 
 { #category : #'benchmarks - analyze' }
 OMBenchmark >> printRefMean: xref [
-	^ (results at: xref) mean printString
+	^ (results at: xref) mean rounded printString
 ]
 
 { #category : #'benchmarks - analyze' }
@@ -672,11 +673,12 @@ OMBenchmark >> printResults [
 
 	|str|
 	str := WriteStream on: String new.
-	str << ('&&', (self printRefMean: #x1ref), '$\pm$', (self printRefMargin:#x1ref)).
+	str << ('References (no instrumentation)&', (self printRefMean: #x1ref), '$\pm$', (self printRefMargin:#x1ref)).
 	str << ('&', (self printRefMean: #x10ref), '$\pm$', (self printRefMargin:#x10ref)).
 	str << ('&', (self printRefMean: #x100ref), '$\pm$', (self printRefMargin:#x100ref)).
 	str <<  '\\'.
-	(results at: #x1) keysDo:[:scenario|	
+	str cr.
+	(results at: #x1) mean keysDo:[:scenario|	
 		self printLineIn: str forScenario: scenario	].
 	^str contents
 ]
