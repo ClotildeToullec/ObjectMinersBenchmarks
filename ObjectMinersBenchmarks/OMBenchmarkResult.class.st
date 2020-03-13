@@ -19,7 +19,7 @@ OMBenchmarkResult >> computeFrequencyMeans [
 		do: [ :key | 
 			freqMeans
 				at: key
-				put: (sample collect: [ :dic | (dic at: key) first frequency ]) average rounded ].
+				put: (sample collect: [ :dic | (dic at: key) first iterations]) average rounded ].
 	^ freqMeans
 ]
 
@@ -57,17 +57,18 @@ OMBenchmarkResult >> computeMemoryOverheadStdev [
 	^ memOverheads
 ]
 
-{ #category : #computing }
+{ #category : #results }
 OMBenchmarkResult >> computeMinersResults [
-	mean := self computeFrequencyMeans.
-	stdev := self computeStdev.
-	memoryOverheadMean := self computeMemoryOverheadMean.
-	memoryOverheadStdev := self computeMemoryOverheadStdev.
+	|meansAndStdevs|
+	meansAndStdevs := self minersPeriodMeansAndStDevs.
+	mean := meansAndStdevs first.
+	stdev :=  meansAndStdevs second
+	
 ]
 
 { #category : #computing }
 OMBenchmarkResult >> computeReferenceFrequencyMeans [
-	^ (sample collect: [ :col | col first first frequency ]) average
+	^ (sample collect: [ :col | col first first iterations]) average
 		rounded
 ]
 
@@ -86,17 +87,17 @@ OMBenchmarkResult >> computeReferenceMemoryOverheadStdev [
 	^ (sample collect: [ :col | col third / col second ]) stdev rounded
 ]
 
-{ #category : #computing }
+{ #category : #results }
 OMBenchmarkResult >> computeReferenceResults [
-	mean := self computeReferenceFrequencyMeans.
-	stdev := self computeReferenceStdev. 
-	memoryOverheadMean := self computeReferenceMemoryOverheadMean.
-	memoryOverheadStdev := self computeReferenceMemoryOverheadStdev.
+	|meansAndStdevs|
+	meansAndStdevs := self referenceMeanAndStdev.
+	mean := meansAndStdevs first.
+	stdev :=  meansAndStdevs second
 ]
 
 { #category : #computing }
 OMBenchmarkResult >> computeReferenceStdev [
-	^ (sample collect: [ :col | col first first frequency ]) stdev rounded
+	^ (sample collect: [ :col | col first first iterations]) stdev rounded
 ]
 
 { #category : #computing }
@@ -113,7 +114,7 @@ OMBenchmarkResult >> computeStdev [
 		do: [ :key | 
 			stdevs
 				at: key
-				put: (sample collect: [ :dic | (dic at: key) first frequency ]) stdev rounded].
+				put: (sample collect: [ :dic | (dic at: key) first iterations]) stdev rounded].
 	^ stdevs
 ]
 
@@ -125,6 +126,44 @@ OMBenchmarkResult >> mean [
 { #category : #accessing }
 OMBenchmarkResult >> mean: anObject [
 	mean := anObject
+]
+
+{ #category : #periods }
+OMBenchmarkResult >> minersPeriodMeansAndStDevs [
+	| periodMeans periodStdevs |
+	periodMeans := Dictionary new.
+	periodStdevs := Dictionary new.
+	self minersPeriods
+		keysAndValuesDo: [ :scenario :periods | 
+			periodMeans at: scenario put: periods average.
+			periodMeans at: scenario put: periods stdev ].
+	^ {periodMeans.
+	periodStdevs}
+]
+
+{ #category : #periods }
+OMBenchmarkResult >> minersPeriods [
+	| periods |
+	periods := Dictionary new.
+	self sampleKeys
+		do: [ :key | 
+			periods
+				at: key
+				put: (sample collect: [ :dic | (dic at: key) first period asNanoSeconds]) ].
+	^ periods
+]
+
+{ #category : #periods }
+OMBenchmarkResult >> referenceMeanAndStdev [
+	|periodMean periodStdev|
+	periodMean := self referencePeriods mean.
+	periodStdev := self referencePeriods stdev.
+	^ { periodMean. periodStdev }
+]
+
+{ #category : #periods }
+OMBenchmarkResult >> referencePeriods [
+	^ (sample collect: [ :col | col first first period asNanoSeconds]) 
 ]
 
 { #category : #accessing }
