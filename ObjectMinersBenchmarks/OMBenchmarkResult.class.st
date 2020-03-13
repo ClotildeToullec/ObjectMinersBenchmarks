@@ -151,7 +151,7 @@ OMBenchmarkResult >> minersPeriodMeansAndStDevs [
 	self minersPeriods
 		keysAndValuesDo: [ :scenario :periods | 
 			periodMeans at: scenario put: periods average.
-			periodMeans at: scenario put: periods stdev ].
+			periodStdevs at: scenario put: periods stdev ].
 	^ {periodMeans.
 	periodStdevs}
 ]
