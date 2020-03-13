@@ -165,7 +165,8 @@ OMBenchmark >> benchAll [
 		at: '(k) = (j) + Reifications'
 			put: self benchMinersTrueConditionWithReifications.
 	"self serializeBenchmark: results"
-	results inspect
+	('results-miners-', speedMode asString) asFileReference writeStream nextPutAll: (STON toString: results); close
+
 ]
 
 { #category : #'becnhmarks-experimental' }
@@ -452,7 +453,7 @@ OMBenchmark >> benchReference2 [
 	speedMode = #x10 ifTrue:[res := self benchReference2X10: inst].
 	speedMode = #x100 ifTrue:[res := self benchReference2X100: inst].	
 	"self serializeBenchmark: res"
-	res inspect
+	('results-reference-', speedMode asString) asFileReference writeStream nextPutAll: (STON toString: res); close
 
 ]
 
