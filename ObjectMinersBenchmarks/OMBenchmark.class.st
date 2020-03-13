@@ -29,6 +29,24 @@ OMBenchmark class >> bench2 [
 ]
 
 { #category : #benchmarking }
+OMBenchmark class >> bench2X10 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x10;
+		benchAll
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> bench2X100 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x100;
+		benchAll
+]
+
+{ #category : #benchmarking }
 OMBenchmark class >> benchReference [
 	<script>
 	Smalltalk garbageCollect.
@@ -43,6 +61,24 @@ OMBenchmark class >> benchReference2 [
 	Smalltalk garbageCollect.
 	^ self new
 		speedMode: #x1;
+		benchReference2
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> benchReference2X10 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x10;
+		benchReference2
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> benchReference2X100 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x100;
 		benchReference2
 ]
 
