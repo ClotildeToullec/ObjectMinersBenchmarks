@@ -139,6 +139,7 @@ OMBenchmark >> bench: aBlock [
 
 { #category : #'benchmarks - 2' }
 OMBenchmark >> bench: aBlock in: collection [
+	aBlock value. "this to generate and compile the reflective method before evaluating"
 	30 timesRepeat: [ collection add: aBlock timeToRun asMilliSeconds ]
 ]
 
@@ -695,6 +696,28 @@ OMBenchmark >> materializeResults [
 ]
 
 { #category : #'benchmarks - analyze' }
+OMBenchmark >> materializeResults2 [
+	results := Dictionary new.
+	results at: #x1 put: (self materializeResults2: 'x1').
+	results at: #x10 put: (self materializeResults2: 'x10').
+	results at: #x100 put: (self materializeResults2: 'x100').
+	results at: #x1ref put: (self materializeResults2: 'x1ref').
+	results at: #x10ref put: (self materializeResults2: 'x10ref').
+	results at: #x100ref put: (self materializeResults2: 'x100ref').
+	
+]
+
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> materializeResults2: dirName [
+	| result fileReference |
+	result := OMBenchmarkResult2 new.
+	fileReference := ('results-' , dirName) asFileReference.	
+	result sample: (self materializeBenchmark: fileReference).
+	result computeResults.
+	^ result
+]
+
+{ #category : #'benchmarks - analyze' }
 OMBenchmark >> materializeResults: dirName [
 	| result bcResults directory |
 	result := OMBenchmarkResult new.
@@ -814,7 +837,11 @@ OMBenchmark >> referenceNoInstrumentationX100 [
 
 { #category : #'reference methods' }
 OMBenchmark >> referenceNoInstrumentationX1000 [
-	(10 squared + 1) asString1000
+	|i res|
+	res := OrderedCollection new.
+	100 timesRepeat: [ i := Random new next + 1.
+		res add: (i > 1.5 ifTrue:[i squared] ifFalse:[i]) ].
+	res shuffled
 ]
 
 { #category : #'miners - setup' }
