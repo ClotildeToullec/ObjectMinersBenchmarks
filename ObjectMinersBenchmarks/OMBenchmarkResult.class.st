@@ -4,7 +4,9 @@ Class {
 	#instVars : [
 		'sample',
 		'mean',
-		'stdev'
+		'stdev',
+		'memoryOverheadMean',
+		'memoryOverheadStdev'
 	],
 	#category : #ObjectMinersBenchmarks
 }
@@ -22,9 +24,73 @@ OMBenchmarkResult >> computeFrequencyMeans [
 ]
 
 { #category : #computing }
-OMBenchmarkResult >> computeResults [
+OMBenchmarkResult >> computeMemoryOverheadMean [
+	| memOverheads |
+	memOverheads := Dictionary new.
+	{'Simple Instrumentation' . 'Full Instrumentation'}
+		do: [ :key | 
+			memOverheads
+				at: key
+				put:
+					(sample
+						collect: [ :dic | 
+							| bc |
+							bc := dic at: key.
+							bc third / bc second ]) average rounded ].
+	^ memOverheads
+]
+
+{ #category : #computing }
+OMBenchmarkResult >> computeMemoryOverheadStdev [
+	| memOverheads |
+	memOverheads := Dictionary new.
+	{'Simple Instrumentation' . 'Full Instrumentation'}
+		do: [ :key | 
+			memOverheads
+				at: key
+				put:
+					(sample
+						collect: [ :dic | 
+							| bc |
+							bc := dic at: key.
+							bc third / bc second ]) stdev rounded ].
+	^ memOverheads
+]
+
+{ #category : #computing }
+OMBenchmarkResult >> computeMinersResults [
 	mean := self computeFrequencyMeans.
-	stdev := self computeStdev 
+	stdev := self computeStdev.
+	memoryOverheadMean := self computeMemoryOverheadMean.
+	memoryOverheadStdev := self computeMemoryOverheadStdev.
+]
+
+{ #category : #computing }
+OMBenchmarkResult >> computeReferenceFrequencyMeans [
+	^ (sample collect: [ :col | col first first frequency ]) average
+		rounded
+]
+
+{ #category : #computing }
+OMBenchmarkResult >> computeReferenceMemoryOverhead [
+	^ (sample collect: [ :col | col first first frequency ]) stdev rounded
+]
+
+{ #category : #computing }
+OMBenchmarkResult >> computeReferenceResults [
+	mean := self computeReferenceFrequencyMeans.
+	stdev := self computeReferenceStdev 
+]
+
+{ #category : #computing }
+OMBenchmarkResult >> computeReferenceStdev [
+	^ (sample collect: [ :col | col first first frequency ]) stdev rounded
+]
+
+{ #category : #computing }
+OMBenchmarkResult >> computeResults [
+	sample first isDictionary ifTrue:[^self computeMinersResults].
+	self computeReferenceResults 
 ]
 
 { #category : #computing }
