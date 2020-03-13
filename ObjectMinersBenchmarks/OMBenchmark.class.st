@@ -110,7 +110,8 @@ OMBenchmark >> benchAll [
 		at: '(j) True Condition' put: self benchMinersTrueCondition;
 		at: '(k) = (j) + Reifications'
 			put: self benchMinersTrueConditionWithReifications.
-	self serializeBenchmark: results
+	"self serializeBenchmark: results"
+	results inspect
 ]
 
 { #category : #'becnhmarks-experimental' }
@@ -211,8 +212,8 @@ OMBenchmark >> benchMinersFalseConditionWithReifications [
 { #category : #benchmarks }
 OMBenchmark >> benchMinersFullNoStack [
 	| miner spaceBefore spaceAfter instancesBefore instancesAfter res |
-	spaceBefore := self spaceForInstances.
-	instancesBefore := self numberOfInstances.
+	"spaceBefore := self spaceForInstances.
+	instancesBefore := self numberOfInstances."
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner captureContext: self reificationsForMiner.
 	miner
@@ -228,12 +229,12 @@ OMBenchmark >> benchMinersFullNoStack [
 	miner recordIntermediateObjects: true.
 	miner install.	
 	res := self benchMiner: true.		
-	spaceAfter := self spaceForInstances.
+	"spaceAfter := self spaceForInstances.
 	instancesAfter := self numberOfInstances.
 	res add: spaceBefore.
 	res add: spaceAfter.
 	res add: instancesBefore.
-	res add: instancesAfter.
+	res add: instancesAfter."
 	miner uninstall.
 	^ res
 ]
@@ -301,17 +302,17 @@ OMBenchmark >> benchMinersReplay [
 { #category : #benchmarks }
 OMBenchmark >> benchMinersSimple [
 	| miner spaceBefore spaceAfter instancesBefore instancesAfter res |
-	spaceBefore := self spaceForInstances.
-	instancesBefore := self numberOfInstances.
+	"spaceBefore := self spaceForInstances.
+	instancesBefore := self numberOfInstances."
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner install.
 	res := self benchMiner: false.
 	spaceAfter := self spaceForInstances.
 	instancesAfter := self numberOfInstances.
-	res add: spaceBefore.
+"	res add: spaceBefore.
 	res add: spaceAfter.
 	res add: instancesBefore.
-	res add: instancesAfter.
+	res add: instancesAfter."
 	miner uninstall.
 	^ res
 ]
@@ -396,7 +397,8 @@ OMBenchmark >> benchReference2 [
 	speedMode = #x1 ifTrue:[res := self benchReference2X1: inst].
 	speedMode = #x10 ifTrue:[res := self benchReference2X10: inst].
 	speedMode = #x100 ifTrue:[res := self benchReference2X100: inst].	
-	self serializeBenchmark: res
+	"self serializeBenchmark: res"
+	res inspect
 
 ]
 
