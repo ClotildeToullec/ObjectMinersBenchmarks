@@ -649,7 +649,7 @@ OMBenchmark >> printLineIn: str forScenario: scenario [
 
 { #category : #'benchmarks - analyze' }
 OMBenchmark >> printMargin: xref forScenario: scenario [
-	^ (((((results at: xref) margin at: scenario) +0.001) roundUpTo: 0.01) truncateTo: 0.01) printString
+	^ (((((results at: xref) margin at: scenario)) rounded)) printString
 ]
 
 { #category : #'benchmarks - analyze' }
@@ -659,7 +659,7 @@ OMBenchmark >> printMean: xref forScenario: scenario [
 
 { #category : #'benchmarks - analyze' }
 OMBenchmark >> printRefMargin: xref [
-	^ (((results at: xref) margin roundUpTo: 0.01) truncateTo: 0.01) printString
+	^ (((results at: xref) margin rounded)) printString
 ]
 
 { #category : #'benchmarks - analyze' }
