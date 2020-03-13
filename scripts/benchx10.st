@@ -1,4 +1,4 @@
 ('Starting benchmarking...', Time now printString) crLog.
-OMBenchmark benchX10.
+OMBenchmark bench2X10.
 ('Ending benchmarking...', Time now printString) crLog.
 Smalltalk quitPrimitive
