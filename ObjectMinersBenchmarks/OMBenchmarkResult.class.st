@@ -134,6 +134,16 @@ OMBenchmarkResult >> computeStdev [
 ]
 
 { #category : #accessing }
+OMBenchmarkResult >> margin [
+	^ margin
+]
+
+{ #category : #accessing }
+OMBenchmarkResult >> margin: anObject [
+	margin := anObject
+]
+
+{ #category : #accessing }
 OMBenchmarkResult >> mean [
 	^ mean
 ]

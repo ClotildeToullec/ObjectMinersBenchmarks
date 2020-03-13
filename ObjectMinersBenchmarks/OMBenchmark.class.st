@@ -644,8 +644,7 @@ OMBenchmark >> printLineIn: str forScenario: scenario [
 	str << (self printMean: #x100 forScenario: scenario).
 	str << '$\pm$'.
 	str << (self printMargin: #x100 forScenario: scenario).
-	str << '\\'.
-	^str contents
+	str << '\\'
 ]
 
 { #category : #'benchmarks - analyze' }
@@ -673,9 +672,9 @@ OMBenchmark >> printResults [
 
 	|str|
 	str := WriteStream on: String new.
-	str << '&&', (self printRefMean: #x1ref), '$\pm$', (self printRefMargin:#x1ref).
-	str << '&', (self printRefMean: #x10ref), '$\pm$', (self printRefMargin:#x10ref).
-	str << '&', (self printRefMean: #x100ref), '$\pm$', (self printRefMargin:#x100ref).
+	str << ('&&', (self printRefMean: #x1ref), '$\pm$', (self printRefMargin:#x1ref)).
+	str << ('&', (self printRefMean: #x10ref), '$\pm$', (self printRefMargin:#x10ref)).
+	str << ('&', (self printRefMean: #x100ref), '$\pm$', (self printRefMargin:#x100ref)).
 	str <<  '\\'.
 	(results at: #x1) keysDo:[:scenario|	
 		self printLineIn: str forScenario: scenario	].
