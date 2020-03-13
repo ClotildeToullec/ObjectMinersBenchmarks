@@ -29,6 +29,15 @@ OMBenchmark class >> bench2 [
 ]
 
 { #category : #benchmarking }
+OMBenchmark class >> bench2X0 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x0;
+		benchAll
+]
+
+{ #category : #benchmarking }
 OMBenchmark class >> bench2X10 [
 	<script>
 	Smalltalk garbageCollect.
@@ -61,6 +70,15 @@ OMBenchmark class >> benchReference2 [
 	Smalltalk garbageCollect.
 	^ self new
 		speedMode: #x1;
+		benchReference2
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> benchReference2X0 [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x0;
 		benchReference2
 ]
 
@@ -118,6 +136,11 @@ OMBenchmark class >> benchX100 [
 		benchAll
 ]
 
+{ #category : #helpers }
+OMBenchmark class >> sampleMethodSource [
+	^'helloWorld ^#helloworld'
+]
+
 { #category : #'miners - setup' }
 OMBenchmark >> actionMethod [
 ]
@@ -139,6 +162,7 @@ OMBenchmark >> bench: aBlock [
 
 { #category : #'benchmarks - 2' }
 OMBenchmark >> bench: aBlock in: collection [
+	aBlock value. "this to generate and compile the reflective method before evaluating"
 	30 timesRepeat: [ collection add: aBlock timeToRun asMilliSeconds ]
 ]
 
@@ -187,6 +211,7 @@ OMBenchmark >> benchMiner: anObject [
 	speedMode = #x10 ifTrue:[self bench: [ inst referenceNoInstrumentationX10 ] in: res].
 	speedMode = #x100 ifTrue:[self bench: [ inst referenceNoInstrumentationX100 ] in: res].
 	speedMode = #x1 ifTrue:[ self bench: [ inst referenceNoInstrumentationX1 ] in: res].
+	speedMode = #x0 ifTrue:[ self bench:  [1000000 timesRepeat: [inst referenceNoInstrumentation ] ] in: res].
 	^res
 ]
 
@@ -449,12 +474,23 @@ OMBenchmark >> benchReference2 [
 	|inst res|
 	inst := OMBenchmark new.
 	Smalltalk garbageCollect.	
+	speedMode = #x0 ifTrue:[res := self benchReference2X0: inst].
 	speedMode = #x1 ifTrue:[res := self benchReference2X1: inst].
 	speedMode = #x10 ifTrue:[res := self benchReference2X10: inst].
 	speedMode = #x100 ifTrue:[res := self benchReference2X100: inst].	
 	"self serializeBenchmark: res"
 	('results-reference-', speedMode asString) asFileReference writeStream nextPutAll: (STON toString: res); close
 
+]
+
+{ #category : #'benchmark - references 2' }
+OMBenchmark >> benchReference2X0: inst [
+	| col |
+	col := OrderedCollection new.
+	30
+		timesRepeat: [ col
+				add:  [1000000 timesRepeat: [inst referenceNoInstrumentation ] ] timeToRun asMilliSeconds ].
+	^ col
 ]
 
 { #category : #'benchmark - references 2' }
@@ -695,6 +731,30 @@ OMBenchmark >> materializeResults [
 ]
 
 { #category : #'benchmarks - analyze' }
+OMBenchmark >> materializeResults2 [
+	results := Dictionary new.
+	results at: #x0 put: (self materializeResults2: 'x0').
+	results at: #x1 put: (self materializeResults2: 'x1').
+	results at: #x10 put: (self materializeResults2: 'x10').
+	results at: #x100 put: (self materializeResults2: 'x100').
+	results at: #x0ref put: (self materializeResults2: 'x0ref').
+	results at: #x1ref put: (self materializeResults2: 'x1ref').
+	results at: #x10ref put: (self materializeResults2: 'x10ref').
+	results at: #x100ref put: (self materializeResults2: 'x100ref').
+	
+]
+
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> materializeResults2: dirName [
+	| result fileReference |
+	result := OMBenchmarkResult2 new.
+	fileReference := ('results-' , dirName) asFileReference.	
+	result sample: (self materializeBenchmark: fileReference).
+	result computeResults.
+	^ result
+]
+
+{ #category : #'benchmarks - analyze' }
 OMBenchmark >> materializeResults: dirName [
 	| result bcResults directory |
 	result := OMBenchmarkResult new.
@@ -710,6 +770,8 @@ OMBenchmark >> materializeResults: dirName [
 
 { #category : #'miners - setup' }
 OMBenchmark >> methodSelectorForSpeedMode [
+	speedMode = #x0
+		ifTrue: [ ^ #referenceNoInstrumentation ].
 	speedMode = #x10
 		ifTrue: [ ^ #referenceNoInstrumentationX10 ].
 	speedMode = #x100
@@ -733,6 +795,10 @@ OMBenchmark >> numberOfInstances [
 OMBenchmark >> printLineIn: str forScenario: scenario [		
 	str << scenario.
 	str << '&'.
+	str << (self printMean: #x0 forScenario: scenario).
+	str << '$\pm$'.
+	str << (self printMargin: #x0 forScenario: scenario).
+	str << '&'.
 	str << (self printMean: #x1 forScenario: scenario).
 	str << '$\pm$'.
 	str << (self printMargin: #x1 forScenario: scenario).
@@ -750,7 +816,7 @@ OMBenchmark >> printLineIn: str forScenario: scenario [
 
 { #category : #'benchmarks - analyze' }
 OMBenchmark >> printMargin: xref forScenario: scenario [
-	^ (((((results at: xref) margin at: scenario)) rounded)) printString
+	^ (((((results at: xref) margin at: scenario)) roundTo: 0.01)) printString
 ]
 
 { #category : #'benchmarks - analyze' }
@@ -773,7 +839,24 @@ OMBenchmark >> printResults [
 
 	|str|
 	str := WriteStream on: String new.
-	str << ('References (no instrumentation)&', (self printRefMean: #x1ref), '$\pm$', (self printRefMargin:#x1ref)).
+	str << ('References (no instrumentation)&', (self printRefMean: #x0ref), '$\pm$', (self printRefMargin:#x0ref)).
+	str << ('&', (self printRefMean: #x1ref), '$\pm$', (self printRefMargin:#x1ref)).
+	str << ('&', (self printRefMean: #x10ref), '$\pm$', (self printRefMargin:#x10ref)).
+	str << ('&', (self printRefMean: #x100ref), '$\pm$', (self printRefMargin:#x100ref)).
+	str <<  '\\'.
+	str cr.
+	(results at: #x1) mean keysDo:[:scenario|	
+		self printLineIn: str forScenario: scenario	].
+	^str contents
+]
+
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> printResults2 [
+
+	|str|
+	str := WriteStream on: String new.
+	str << ('References (no instrumentation)&', (self printRefMean: #x0ref), '$\pm$', (self printRefMargin:#x0ref)).
+	str << ('&', (self printRefMean: #x1ref), '$\pm$', (self printRefMargin:#x1ref)).
 	str << ('&', (self printRefMean: #x10ref), '$\pm$', (self printRefMargin:#x10ref)).
 	str << ('&', (self printRefMean: #x100ref), '$\pm$', (self printRefMargin:#x100ref)).
 	str <<  '\\'.
@@ -798,6 +881,11 @@ OMBenchmark >> rebenchX1V2 [
 ]
 
 { #category : #'reference methods' }
+OMBenchmark >> referenceNoInstrumentation [
+	(10 squared + 1) asString
+]
+
+{ #category : #'reference methods' }
 OMBenchmark >> referenceNoInstrumentationX1 [
 	(10 squared + 1) asString1
 ]
@@ -814,7 +902,11 @@ OMBenchmark >> referenceNoInstrumentationX100 [
 
 { #category : #'reference methods' }
 OMBenchmark >> referenceNoInstrumentationX1000 [
-	(10 squared + 1) asString1000
+	|i res|
+	res := OrderedCollection new.
+	100 timesRepeat: [ i := Random new next + 1.
+		res add: (i > 1.5 ifTrue:[i squared] ifFalse:[i]) ].
+	res shuffled
 ]
 
 { #category : #'miners - setup' }
