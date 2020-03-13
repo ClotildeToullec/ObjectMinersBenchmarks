@@ -5,6 +5,7 @@ Class {
 		'sample',
 		'mean',
 		'stdev',
+		'margin',
 		'memoryOverheadMean',
 		'memoryOverheadStdev'
 	],
@@ -57,12 +58,20 @@ OMBenchmarkResult >> computeMemoryOverheadStdev [
 	^ memOverheads
 ]
 
+{ #category : #margins }
+OMBenchmarkResult >> computeMinersMargin [
+	margin := Dictionary new.
+	stdev
+		keysAndValuesDo: [ :scn :dev | margin at: scn put: 1.96 * (dev / 30 sqrt) ]
+]
+
 { #category : #results }
 OMBenchmarkResult >> computeMinersResults [
 	|meansAndStdevs|
 	meansAndStdevs := self minersPeriodMeansAndStDevs.
 	mean := meansAndStdevs first.
-	stdev :=  meansAndStdevs second
+	stdev :=  meansAndStdevs second.
+	self computeMinersMargin
 	
 ]
 
@@ -70,6 +79,11 @@ OMBenchmarkResult >> computeMinersResults [
 OMBenchmarkResult >> computeReferenceFrequencyMeans [
 	^ (sample collect: [ :col | col first first iterations]) average
 		rounded
+]
+
+{ #category : #margins }
+OMBenchmarkResult >> computeReferenceMargin [
+	margin := 1.96 * (stdev / 30 sqrt)
 ]
 
 { #category : #computing }
@@ -92,7 +106,8 @@ OMBenchmarkResult >> computeReferenceResults [
 	|meansAndStdevs|
 	meansAndStdevs := self referenceMeanAndStdev.
 	mean := meansAndStdevs first.
-	stdev :=  meansAndStdevs second
+	stdev := meansAndStdevs second.
+	self computeReferenceMargin
 ]
 
 { #category : #computing }
@@ -156,7 +171,7 @@ OMBenchmarkResult >> minersPeriods [
 { #category : #periods }
 OMBenchmarkResult >> referenceMeanAndStdev [
 	|periodMean periodStdev|
-	periodMean := self referencePeriods mean.
+	periodMean := self referencePeriods average.
 	periodStdev := self referencePeriods stdev.
 	^ { periodMean. periodStdev }
 ]
