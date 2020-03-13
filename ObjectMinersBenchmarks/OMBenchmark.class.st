@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'bool',
 		'classesForMemoryEvaluation',
-		'speedMode'
+		'speedMode',
+		'results'
 	],
 	#category : #ObjectMinersBenchmarks
 }
@@ -515,8 +516,34 @@ OMBenchmark >> initialize [
 ]
 
 { #category : #'files - utilities' }
-OMBenchmark >> materializeBenchmark: bcFilename [
-	self flag: 'todo'
+OMBenchmark >> materializeBenchmark: bcFileReference [
+	^STON fromString: bcFileReference contents
+]
+
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> materializeResults [
+	results := Dictionary new.
+	results at: #x1 put: (self materializeResults: 'x1').
+	results at: #x10 put: (self materializeResults: 'x10').
+	results at: #x100 put: (self materializeResults: 'x100').
+	results at: #x1ref put: (self materializeResults: 'x1ref').
+	results at: #x10ref put: (self materializeResults: 'x10ref').
+	results at: #x100ref put: (self materializeResults: 'x100ref').
+	
+]
+
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> materializeResults: dirName [
+	| result bcResults directory |
+	result := OMBenchmarkResult new.
+	bcResults := OrderedCollection new.
+	directory := 'results' asFileReference / ('ombc-' , dirName).
+	directory allFiles
+		do:
+			[ :fileReference | bcResults add: (self materializeBenchmark: fileReference) ].
+	result sample: bcResults.
+	result computeResults.
+	^ result
 ]
 
 { #category : #'miners - setup' }
