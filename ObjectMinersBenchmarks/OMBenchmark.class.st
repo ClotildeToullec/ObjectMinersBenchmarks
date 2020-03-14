@@ -405,8 +405,8 @@ OMBenchmark >> benchMinersSimple [
 	miner := ObjectMiner new reachFromAST: self astForMiner.
 	miner install.
 	res := self benchMiner: false.
-	spaceAfter := self spaceForInstances.
-	instancesAfter := self numberOfInstances.
+"	spaceAfter := self spaceForInstances.
+	instancesAfter := self numberOfInstances."
 "	res add: spaceBefore.
 	res add: spaceAfter.
 	res add: instancesBefore.
