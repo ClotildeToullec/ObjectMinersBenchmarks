@@ -194,17 +194,8 @@ OMBenchmark >> benchAll [
 
 ]
 
-{ #category : #'becnhmarks-experimental' }
-OMBenchmark >> benchMiner2: anObject [
-	|inst|
-	inst := OMBenchmark new.
-	inst bool: anObject.
-	
-	^[1000 timesRepeat:  [ inst referenceNoInstrumentationX100 ]] timeToRun asNanoSeconds 
-]
-
 { #category : #'benchmarks - 2' }
-OMBenchmark >> benchMiner: anObject [
+OMBenchmark >> benchMiner2: anObject [
 	|inst res|
 	inst := OMBenchmark new.
 	inst bool: anObject.
@@ -217,7 +208,7 @@ OMBenchmark >> benchMiner: anObject [
 ]
 
 { #category : #'benchmarks - tools' }
-OMBenchmark >> benchMinerOld: anObject [
+OMBenchmark >> benchMiner: anObject [
 	|inst|
 	inst := OMBenchmark new.
 	inst bool: anObject.
