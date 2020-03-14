@@ -839,10 +839,10 @@ OMBenchmark >> numberOfInstances [
 { #category : #'benchmarks - analyze' }
 OMBenchmark >> printLineIn: str forScenario: scenario [		
 	str << scenario.
-	str << '&'.
+	"str << '&'.
 	str << (self printMean: #x0 forScenario: scenario).
 	str << '$\pm$'.
-	str << (self printMargin: #x0 forScenario: scenario).
+	str << (self printMargin: #x0 forScenario: scenario)."
 	str << '&'.
 	str << (self printMean: #x1 forScenario: scenario).
 	str << '$\pm$'.
@@ -866,21 +866,36 @@ OMBenchmark >> printMargin: xref forScenario: scenario [
 
 { #category : #'benchmarks - analyze' }
 OMBenchmark >> printMean: xref forScenario: scenario [
-	^ ((results at: xref) mean at: scenario) rounded printString
+	^ (((results at: xref) mean at: scenario) rounded) printString
 ]
 
 { #category : #'benchmarks - analyze' }
 OMBenchmark >> printRefMargin: xref [
-	^ (((results at: xref) margin rounded)) printString
+	^ (((results at: xref) margin roundTo: 0.01)) printString
 ]
 
 { #category : #'benchmarks - analyze' }
 OMBenchmark >> printRefMean: xref [
-	^ (results at: xref) mean rounded printString
+	^ ((results at: xref) mean rounded )printString
 ]
 
 { #category : #'benchmarks - analyze' }
 OMBenchmark >> printResults [
+
+	|str|
+	str := WriteStream on: String new.	
+	str << ('References (no instrumentation)&', (self printRefMean: #x1ref), '$\pm$', (self printRefMargin:#x1ref)).
+	str << ('&', (self printRefMean: #x10ref), '$\pm$', (self printRefMargin:#x10ref)).
+	str << ('&', (self printRefMean: #x100ref), '$\pm$', (self printRefMargin:#x100ref)).
+	str <<  '\\'.
+	str cr.
+	(results at: #x1) mean keysDo:[:scenario|	
+		self printLineIn: str forScenario: scenario	].
+	^str contents
+]
+
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> printResults2 [
 
 	|str|
 	str := WriteStream on: String new.
@@ -896,7 +911,7 @@ OMBenchmark >> printResults [
 ]
 
 { #category : #'benchmarks - analyze' }
-OMBenchmark >> printResults2 [
+OMBenchmark >> printResults3 [
 
 	|str|
 	str := WriteStream on: String new.
