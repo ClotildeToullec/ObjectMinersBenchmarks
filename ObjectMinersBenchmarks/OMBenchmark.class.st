@@ -912,6 +912,8 @@ OMBenchmark >> referenceNoInstrumentationX1000 [
 
 { #category : #'miners - setup' }
 OMBenchmark >> reificationsForMiner [
+	speedMode = #x1
+		ifTrue: [ ^ #(#object #class #variable #name) ].
 	^ #(#object #class #receiver #selector)
 ]
 
