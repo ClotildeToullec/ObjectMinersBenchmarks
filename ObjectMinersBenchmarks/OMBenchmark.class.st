@@ -194,6 +194,32 @@ OMBenchmark >> benchAll [
 
 ]
 
+{ #category : #'benchmark - memory' }
+OMBenchmark >> benchFullMinerMemory [
+	| miner before after |
+	before := self numberOfInstances.	
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner captureContext: self reificationsForMiner.
+	miner
+		setCondition:
+			(CollectEvaluation new
+				source: 'object bool';
+				yourself).
+	miner
+		setAction:
+			(CollectEvaluation new
+				source: 'object actionMethod';
+				yourself).
+	miner recordIntermediateObjects: true.
+	miner install.	
+	self benchMiner: true.
+	after := self numberOfInstances.
+	miner uninstall.
+	('memory' asFileReference / ('memory-full-' , speedMode)) writeStream
+		nextPutAll:	(STON toString: {before.	after});
+		close
+]
+
 { #category : #'benchmarks - 2' }
 OMBenchmark >> benchMiner2: anObject [
 	|inst res|
@@ -515,6 +541,19 @@ OMBenchmark >> benchReference2X1: inst [
 	^ col
 ]
 
+{ #category : #'benchmark - memory' }
+OMBenchmark >> benchReferenceMemory [
+	| before after |
+	before := self numberOfInstances.
+	speedMode = #x1 ifTrue: [ self benchReferenceX1: self class new ].
+	speedMode = #x10 ifTrue: [ self benchReferenceX10: self class new ].
+	speedMode = #x100 ifTrue: [ self benchReferenceX100: self class new ].
+	after := self numberOfInstances.
+	('memory' asFileReference / ('memory-ref-' , speedMode)) writeStream
+		nextPutAll:	(STON toString: {before.	after});
+		close
+]
+
 { #category : #'benchmark - references' }
 OMBenchmark >> benchReferenceX100: inst [
 	^ self bench: [ inst referenceNoInstrumentationX100 ]
@@ -528,6 +567,20 @@ OMBenchmark >> benchReferenceX10: inst [
 { #category : #'benchmark - references' }
 OMBenchmark >> benchReferenceX1: inst [
 	^ self bench: [ inst referenceNoInstrumentationX1 ]
+]
+
+{ #category : #'benchmark - memory' }
+OMBenchmark >> benchSimpleMinerMemory [
+	| miner before after |
+	before := self numberOfInstances.	
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner install.
+	self benchMiner: false.	
+	after := self numberOfInstances.
+	miner uninstall.
+	('memory' asFileReference / ('memory-simple-' , speedMode)) writeStream
+		nextPutAll:	(STON toString: {before.	after});
+		close
 ]
 
 { #category : #'files - utilities' }
