@@ -5,7 +5,8 @@ Class {
 		'bool',
 		'classesForMemoryEvaluation',
 		'speedMode',
-		'results'
+		'results',
+		'x'
 	],
 	#category : #ObjectMinersBenchmarks
 }
@@ -170,7 +171,7 @@ OMBenchmark >> bench: aBlock in: collection [
 OMBenchmark >> benchAll [
 	results := Dictionary new.
 	results
-		at: '(a) Simple Instrumentation' put: self benchMinersSimple;
+		"at: '(a) Simple Instrumentation' put: self benchMinersSimple;
 		at: '(d) Record Intermediate Objects'
 			put: self benchMinersRecordIntermediate;
 		at: '(b) Record Reifications' put: self benchMinersWithReifications;
@@ -181,15 +182,15 @@ OMBenchmark >> benchAll [
 			put: self benchMinersActionWithReifications;
 		at: '(h) False Condition' put: self benchMinersFalseCondition;
 		at: '(i) = (h) + Reifications'
-			put: self benchMinersFalseConditionWithReifications;
-		at: '(l) Full Instrumentation' put: self benchMinersFullNoStack;
+			put: self benchMinersFalseConditionWithReifications;"
+		at: '(l) Full Instrumentation' put: self benchMinersFullNoStack";
 		at: '(m) Replay' put: self benchMinersReplay;
 		at: '(c) Record Context' put: self benchMinersSimpleWithContext;
 		at: '(j) True Condition' put: self benchMinersTrueCondition;
 		at: '(k) = (j) + Reifications'
-			put: self benchMinersTrueConditionWithReifications.
-	"self serializeBenchmark: results"
-	('results-miners-', speedMode asString) asFileReference writeStream nextPutAll: (STON toString: results); close
+			put: self benchMinersTrueConditionWithReifications".
+	self serializeBenchmark: results
+	"('results-miners-', speedMode asString) asFileReference writeStream nextPutAll: (STON toString: results); close"
 
 ]
 
@@ -458,14 +459,14 @@ OMBenchmark >> benchReference [
 	|inst spaceBefore instancesBefore instancesAfter spaceAfter res|
 	inst := OMBenchmark new.
 	Smalltalk garbageCollect.
-	spaceBefore := self spaceForInstances.
-	instancesBefore := self numberOfInstances.
+	"spaceBefore := self spaceForInstances.
+	instancesBefore := self numberOfInstances."
 	speedMode = #x1 ifTrue:[res := self benchReferenceX1: inst].
 	speedMode = #x10 ifTrue:[res := self benchReferenceX10: inst].
 	speedMode = #x100 ifTrue:[res := self benchReferenceX100: inst].
-	spaceAfter := self spaceForInstances.
-	instancesAfter := self numberOfInstances.
-	self serializeBenchmark: {res. spaceBefore. spaceAfter. instancesBefore. instancesAfter} asOrderedCollection.
+	"spaceAfter := self spaceForInstances.
+	instancesAfter := self numberOfInstances."
+	self serializeBenchmark: {res". spaceBefore. spaceAfter. instancesBefore. instancesAfter"} asOrderedCollection.
 
 ]
 
@@ -887,17 +888,17 @@ OMBenchmark >> referenceNoInstrumentation [
 
 { #category : #'reference methods' }
 OMBenchmark >> referenceNoInstrumentationX1 [
-	(10 squared + 1) asString1
+	x := 1
 ]
 
 { #category : #'reference methods' }
 OMBenchmark >> referenceNoInstrumentationX10 [
-	(10 squared + 1) asString10
+	10 squared + 1
 ]
 
 { #category : #'reference methods' }
 OMBenchmark >> referenceNoInstrumentationX100 [
-	(10 squared + 1) asString100
+	self class compile: self class sampleMethodSource 
 ]
 
 { #category : #'reference methods' }
