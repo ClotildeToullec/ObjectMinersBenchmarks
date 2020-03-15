@@ -242,7 +242,7 @@ OMBenchmark >> benchFullMinerMemory [
 	self benchMiner: true.
 	after := self numberOfInstances.
 	miner uninstall.
-	('memory' asFileReference / ('memory-full-' , speedMode)) writeStream
+	('memory' asFileReference / ('memory-full-' , speedMode, '-', Time now asMilliSeconds printString)) writeStream
 		nextPutAll:	(STON toString: {before.	after});
 		close
 ]
@@ -576,7 +576,7 @@ OMBenchmark >> benchReferenceMemory [
 	speedMode = #x10 ifTrue: [ self benchReferenceX10: self class new ].
 	speedMode = #x100 ifTrue: [ self benchReferenceX100: self class new ].
 	after := self numberOfInstances.
-	('memory' asFileReference / ('memory-ref-' , speedMode)) writeStream
+	('memory' asFileReference / ('memory-ref-' , speedMode, '-', Time now asMilliSeconds printString)) writeStream
 		nextPutAll:	(STON toString: {before.	after});
 		close
 ]
@@ -605,7 +605,7 @@ OMBenchmark >> benchSimpleMinerMemory [
 	self benchMiner: false.	
 	after := self numberOfInstances.
 	miner uninstall.
-	('memory' asFileReference / ('memory-simple-' , speedMode)) writeStream
+	('memory' asFileReference / ('memory-simple-' , speedMode, '-', Time now asMilliSeconds printString)) writeStream
 		nextPutAll:	(STON toString: {before.	after});
 		close
 ]
