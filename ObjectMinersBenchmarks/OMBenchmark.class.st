@@ -210,9 +210,9 @@ OMBenchmark >> benchAll [
 		at: '(h) False Condition' put: self benchMinersFalseCondition;
 		at: '(i) = (h) + Reifications'
 			put: self benchMinersFalseConditionWithReifications;"
-		at: '(l) Full Instrumentation' put: self benchMinersFullNoStack";
-		at: '(m) Replay' put: self benchMinersReplay;
-		at: '(c) Record Context' put: self benchMinersSimpleWithContext;
+		"at: '(l) Full Instrumentation' put: self benchMinersFullNoStack"";
+		at: '(m) Replay' put: self benchMinersReplay;"
+		at: '(c) Record Context' put: self benchMinersSimpleWithContext";
 		at: '(j) True Condition' put: self benchMinersTrueCondition;
 		at: '(k) = (j) + Reifications'
 			put: self benchMinersTrueConditionWithReifications".
@@ -1081,7 +1081,7 @@ OMBenchmark >> setMemoryEvaluationClasses [
 { #category : #'miners - setup' }
 OMBenchmark >> setReplayForMiner: miner [
 	|node rawData record|
-	node := self astForMiner allChildren last.
+	node := self astForMiner.
 	rawData := {nil. 1. node. nil.}.
 	record := OmniscientItem new.
 	record rawData: rawData.
