@@ -66,6 +66,15 @@ OMBenchmark class >> benchFullMinerMemory [
 ]
 
 { #category : #benchmarking }
+OMBenchmark class >> benchMinerReplayMemory [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x100;
+		benchMinerReplayMemory
+]
+
+{ #category : #benchmarking }
 OMBenchmark class >> benchReference [
 	<script>
 	Smalltalk garbageCollect.
@@ -268,6 +277,21 @@ OMBenchmark >> benchMiner: anObject [
 	speedMode = #x10 ifTrue:[^self bench: [ inst referenceNoInstrumentationX10 ]].
 	speedMode = #x100 ifTrue:[^self bench: [ inst referenceNoInstrumentationX100 ]].
 	^self bench: [ inst referenceNoInstrumentationX1 ]
+]
+
+{ #category : #'benchmark - memory' }
+OMBenchmark >> benchMinerReplayMemory [
+	| miner before after |
+	before := self numberOfInstances.	
+	miner := ObjectMiner new reachFromAST: self astForMiner.
+	miner install.
+	self setReplayForMiner: miner.
+	self benchMiner: false.	
+	after := self numberOfInstances.
+	miner uninstall.
+	('memory' asFileReference / ('memory-replay-' , speedMode, '-', Time now asMilliSeconds printString)) writeStream
+		nextPutAll:	(STON toString: {before.	after});
+		close
 ]
 
 { #category : #benchmarks }
