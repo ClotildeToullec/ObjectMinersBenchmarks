@@ -57,6 +57,15 @@ OMBenchmark class >> bench2X100 [
 ]
 
 { #category : #benchmarking }
+OMBenchmark class >> benchFullMinerMemory [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x100;
+		benchFullMinerMemory
+]
+
+{ #category : #benchmarking }
 OMBenchmark class >> benchReference [
 	<script>
 	Smalltalk garbageCollect.
@@ -102,6 +111,15 @@ OMBenchmark class >> benchReference2X100 [
 ]
 
 { #category : #benchmarking }
+OMBenchmark class >> benchReferenceMemory [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x100;
+		benchReferenceMemory
+]
+
+{ #category : #benchmarking }
 OMBenchmark class >> benchReferenceX10 [
 	<script>
 	Smalltalk garbageCollect.
@@ -117,6 +135,15 @@ OMBenchmark class >> benchReferenceX100 [
 	^ self new
 		speedMode: #x100;
 		benchReference
+]
+
+{ #category : #benchmarking }
+OMBenchmark class >> benchSimpleMinerMemory [
+	<script>
+	Smalltalk garbageCollect.
+	^ self new
+		speedMode: #x100;
+		benchSimpleMinerMemory
 ]
 
 { #category : #benchmarking }
