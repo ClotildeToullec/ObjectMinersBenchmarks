@@ -791,6 +791,29 @@ OMBenchmark >> materializeBenchmark: bcFileReference [
 ]
 
 { #category : #'benchmarks - analyze' }
+OMBenchmark >> materializeMemoryResults [
+	results := Dictionary new.
+	results at: 'Reference' put: (self materializeMemoryResults: 'memory/reference').
+	results at: 'Simple Instrumentation' put: (self materializeMemoryResults: 'memory/simple').
+	results at: 'FullInstrumentation' put: (self materializeMemoryResults: 'memory/full').
+	^self printMemoryResults
+]
+
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> materializeMemoryResults: dirName [
+	| result bcResults directory |
+	result := OMMemoryBenchmarkResult new.
+	bcResults := OrderedCollection new.
+	directory := dirName asFileReference.
+	directory allFiles
+		do:
+			[ :fileReference | bcResults add: (self materializeBenchmark: fileReference) ].
+	result sample: bcResults.
+	result computeResults.
+	^ result
+]
+
+{ #category : #'benchmarks - analyze' }
 OMBenchmark >> materializeResults [
 	results := Dictionary new.
 	results at: #x1 put: (self materializeResults: 'x1').
@@ -894,6 +917,17 @@ OMBenchmark >> printMargin: xref forScenario: scenario [
 { #category : #'benchmarks - analyze' }
 OMBenchmark >> printMean: xref forScenario: scenario [
 	^ (((results at: xref) mean at: scenario) rounded) printString
+]
+
+{ #category : #'benchmarks - analyze' }
+OMBenchmark >> printMemoryResults [
+	| str |
+	str := WriteStream on: String new.
+	results
+		keysAndValuesDo: [ :scn :res | 
+			str << (scn , '&' , res mean printString, '$\pm$' , res margin printString, '\\').
+			str cr ].
+	^ str contents
 ]
 
 { #category : #'benchmarks - analyze' }
