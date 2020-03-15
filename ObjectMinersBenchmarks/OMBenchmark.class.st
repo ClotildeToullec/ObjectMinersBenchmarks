@@ -817,6 +817,7 @@ OMBenchmark >> materializeBenchmark: bcFileReference [
 { #category : #'benchmarks - analyze' }
 OMBenchmark >> materializeMemoryResults [
 	results := Dictionary new.
+	results at: 'Replay' put: (self materializeMemoryResults: 'memory/replay').
 	results at: 'Reference' put: (self materializeMemoryResults: 'memory/reference').
 	results at: 'Simple Instrumentation' put: (self materializeMemoryResults: 'memory/simple').
 	results at: 'FullInstrumentation' put: (self materializeMemoryResults: 'memory/full').
