@@ -6,6 +6,10 @@ Load ObjectMiners from https://github.com/ClotildeToullec/ObjectMiners (follow i
 
 Go to Iceberg (cmd+o+i) and checkout branch Collectors 3-optimizations.
 
+Save your image.
+
+## Launch the benchmarks
+
 Open the class browser and go to class `OMBenchmark`. In the instance side, comment or uncomment the parts you want to evaluate. Scripts can be launched from the class side. Data is saved on files. To load and compute the data, use:
 
 ```Smalltalk
@@ -15,7 +19,7 @@ OMBenchmark new materializeMemoryResults.
 
 It is possible that depending on your local folders names the tool does not find his marks, that can be set in methods `materializeResults` and `materializeMemoryResults`.
 
-## Launch the benchmarks
+To facilitate running the benchmarks, some bash scripts are provided in this repository. They must be edited to properly set the virtual machine location.
 
 # Experiment: instrumenting with Object Miners
 In the following we describe how we instrumented a reference method for the evaluation of Object Miners.
