@@ -26,8 +26,14 @@ benchMinersFullNoStack
   | miner res |
   miner := ObjectMiner new reachFromAST: self astForMiner.
   miner captureContext: self reificationsForMiner.
-  miner setCondition: (CollectEvaluation new source: 'object bool'; yourself).
-  miner setAction: (CollectEvaluation new source: 'object actionMethod'; yourself).
+  miner setCondition: 
+    (CollectEvaluation new 
+      source: 'object bool';
+      yourself).
+  miner setAction: 
+    (CollectEvaluation new 
+      source: 'object actionMethod'; 
+      yourself).
   miner recordIntermediateObjects: true.
   miner install.
   res := self benchMiner.
