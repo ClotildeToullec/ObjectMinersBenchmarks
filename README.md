@@ -1,5 +1,14 @@
-# Benchmarks for Object Miners: load ObjectMiners here
-https://github.com/ClotildeToullec/ObjectMiners
+# Benchmarks for Object Miners
+## Installation
+Install the Pharo launcher and start a fresh Pharo 7 image (https://pharo.org/).
+
+Load ObjectMiners from https://github.com/ClotildeToullec/ObjectMiners (follow instructions from that github project).
+
+Go to Iceberg (cmd+o+i) and checkout branch Collectors 3-optimizations.
+
+Open the class browser and go to class `OMBenchmark`. In the instance side, comment or uncomment the parts you want to evaluate. Scripts can be launched from the class side.
+
+## Launch the benchmarks
 
 # Experiment: instrumenting with Object Miners
 In the following we describe how we instrumented a reference method for the evaluation of Object Miners.
