@@ -7,7 +7,7 @@ The reference method is illustrated below. At run-time it just performs a simple
 
 ```Smalltalk
 referenceNoInstrumentation
-	10 squared + 1
+  10 squared + 1
 ```
 
 ## Miner installation
@@ -23,22 +23,14 @@ We run the benchmark (line 17) then uninstall the miner (line 18) and return the
 
 ```Smalltalk
 benchMinersFullNoStack
-	| miner res |
-	miner := ObjectMiner new reachFromAST: self astForMiner.
-	miner captureContext: self reificationsForMiner.
-	miner
-		setCondition:
-			(CollectEvaluation new
-				source: 'object bool';
-				yourself).
-	miner
-		setAction:
-			(CollectEvaluation new
-				source: 'object actionMethod';
-				yourself).
-	miner recordIntermediateObjects: true.
-	miner install.
-	res := self benchMiner.
-	miner uninstall.
-	^ res
+  | miner res |
+  miner := ObjectMiner new reachFromAST: self astForMiner.
+  miner captureContext: self reificationsForMiner.
+  miner setCondition: (CollectEvaluation new source: 'object bool'; yourself).
+  miner setAction: (CollectEvaluation new source: 'object actionMethod'; yourself).
+  miner recordIntermediateObjects: true.
+  miner install.
+  res := self benchMiner.
+  miner uninstall.
+  ^ res
 ```
